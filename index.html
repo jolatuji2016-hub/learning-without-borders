@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Without Borders | Online Worksheets</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f3f6fb;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+header {
+    background: linear-gradient(135deg, #102a56, #1769aa);
+    color: white;
+    padding: 35px 20px;
+    text-align: center;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+header p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.header-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    padding: 7px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 25px 16px;
+}
+
+.welcome {
+    text-align: center;
+    margin: 15px 0 25px;
+}
+
+.welcome h2 {
+    font-size: 25px;
+    color: #102a56;
+    margin-bottom: 8px;
+}
+
+.welcome p {
+    color: #64748b;
+}
+
+.search-box {
+    max-width: 600px;
+    margin: 20px auto 25px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: #1769aa;
+    box-shadow: 0 0 0 3px rgba(23,105,170,0.12);
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.filter-btn {
+    border: 1px solid #1769aa;
+    background: white;
+    color: #1769aa;
+    padding: 9px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: #1769aa;
+    color: white;
+}
+
+.section-title {
+    font-size: 22px;
+    color: #102a56;
+    margin-bottom: 18px;
+}
+
+.worksheet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 4px 15px rgba(15,23,42,0.06);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 22px rgba(15,23,42,0.10);
+}
+
+.subject-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.badge {
+    display: inline-block;
+    font-size: 12px;
+    background: #e0f2fe;
+    color: #075985;
+    padding: 4px 9px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.card h3 {
+    font-size: 19px;
+    margin-bottom: 8px;
+    color: #102a56;
+}
+
+.card p {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 18px;
+}
+
+.open-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    background: #1769aa;
+    color: white;
+    padding: 11px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.open-btn:hover {
+    background: #102a56;
+}
+
+.coming-soon {
+    display: block;
+    text-align: center;
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 11px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 30px;
+    color: #64748b;
+    display: none;
+}
+
+.info-box {
+    background: #eaf4ff;
+    border-left: 4px solid #1769aa;
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 35px;
+}
+
+.info-box h3 {
+    color: #102a56;
+    margin-bottom: 5px;
+}
+
+footer {
+    margin-top: 40px;
+    background: #102a56;
+    color: white;
+    text-align: center;
+    padding: 25px 15px;
+    font-size: 14px;
+}
+
+footer p {
+    margin: 4px 0;
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 25px;
+    }
+
+    header {
+        padding: 28px 15px;
+    }
+
+    .welcome h2 {
+        font-size: 22px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">📚 Learning Without Borders</div>
+    <p>Learn. Practise. Improve.</p>
+    <span class="header-tag">Your learning journey starts here!</span>
+</header>
+
+<main>
+
+    <section class="welcome">
+        <h2>Welcome to Your Learning Centre</h2>
+        <p>Choose a worksheet, answer the questions and test your knowledge.</p>
+    </section>
+
+    <div class="search-box">
+        <input
+            type="search"
+            id="searchInput"
+            placeholder="🔍 Search for a worksheet..."
+            aria-label="Search worksheets"
+        >
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">All Worksheets</button>
+        <button class="filter-btn" data-filter="computer studies">Computer Studies</button>
+        <button class="filter-btn" data-filter="basic science">Basic Science</button>
+        <button class="filter-btn" data-filter="mathematics">Mathematics</button>
+        <button class="filter-btn" data-filter="biology">Biology</button>
+        <button class="filter-btn" data-filter="physics">Physics</button>
+        <button class="filter-btn" data-filter="english">English Language</button>
+    </div>
+
+    <h2 class="section-title">Available Worksheets</h2>
+
+    <div class="worksheet-grid" id="worksheetGrid">
+
+        <article class="card"
+            data-subject="computer studies"
+            data-title="python basics">
+            <div class="subject-icon">💻</div>
+            <span class="badge">Computer Studies</span>
+            <h3>Python Basics</h3>
+            <p>Practise the fundamentals of Python programming with an interactive worksheet.</p>
+            <a class="open-btn"
+               href="https://jolatuji2016-hub.github.io/python-basics-worksheet/"
+               target="_blank"
+               rel="noopener noreferrer">Open Worksheet →</a>
+        </article>
+
+        <article class="card"
+            data-subject="basic science"
+            data-title="classes of levers">
+            <div class="subject-icon">⚙️</div>
+            <span class="badge">Basic Science</span>
+            <h3>Classes of Levers</h3>
+            <p>Test your understanding of the three classes of levers and their examples.</p>
+            <a class="open-btn"
+               href="https://jolatuji2016-hub.github.io/Science-Lever/"
+               target="_blank"
+               rel="noopener noreferrer">Open Worksheet →</a>
+        </article>
+
+        <article class="card"
+            data-subject="mathematics"
+            data-title="mathematics worksheets">
+            <div class="subject-icon">📐</div>
+            <span class="badge">Mathematics</span>
+            <h3>Mathematics Worksheets</h3>
+            <p>Practise mathematical concepts and improve your problem-solving skills.</p>
+            <span class="coming-soon">More worksheets coming soon</span>
+        </article>
+
+        <article class="card"
+            data-subject="biology"
+            data-title="biology worksheets">
+            <div class="subject-icon">🧬</div>
+            <span class="badge">Biology</span>
+            <h3>Biology Worksheets</h3>
+            <p>Explore living things, cells and other biological concepts.</p>
+            <span class="coming-soon">More worksheets coming soon</span>
+        </article>
+
+        <article class="card"
+            data-subject="physics"
+            data-title="physics worksheets">
+            <div class="subject-icon">🔬</div>
+            <span class="badge">Physics</span>
+            <h3>Physics Worksheets</h3>
+            <p>Practise physics concepts, quantities, units and calculations.</p>
+            <span class="coming-soon">More worksheets coming soon</span>
+        </article>
+
+        <article class="card"
+            data-subject="english"
+            data-title="english language worksheets">
+            <div class="subject-icon">📖</div>
+            <span class="badge">English Language</span>
+            <h3>English Language</h3>
+            <p>Improve your grammar, vocabulary, comprehension and writing skills.</p>
+            <span class="coming-soon">More worksheets coming soon</span>
+        </article>
+
+    </div>
+
+    <div class="empty-message" id="emptyMessage">
+        No worksheets found. Try another search.
+    </div>
+
+    <section class="info-box">
+        <h3>🎯 Keep Learning!</h3>
+        <p>Choose an available worksheet to begin. More subjects and practice exercises will be added as the learning centre grows.</p>
+    </section>
+
+</main>
+
+<footer>
+    <p><strong>Learning Without Borders</strong></p>
+    <p>Learn anywhere. Practise anytime. Keep improving.</p>
+</footer>
+
+<script>
+const searchInput = document.getElementById("searchInput");
+const cards = document.querySelectorAll(".card");
+const filterButtons = document.querySelectorAll(".filter-btn");
+const emptyMessage = document.getElementById("emptyMessage");
+
+let activeFilter = "all";
+
+function filterWorksheets() {
+    const searchText = searchInput.value.toLowerCase().trim();
+    let visibleCount = 0;
+
+    cards.forEach(function(card) {
+        const subject = card.dataset.subject;
+        const title = card.dataset.title;
+        const text = card.innerText.toLowerCase();
+
+        const matchesSearch =
+            title.includes(searchText) ||
+            subject.includes(searchText) ||
+            text.includes(searchText);
+
+        const matchesFilter =
+            activeFilter === "all" ||
+            subject === activeFilter;
+
+        if (matchesSearch && matchesFilter) {
+            card.style.display = "";
+            visibleCount++;
+        } else {
+            card.style.display = "none";
+        }
+    });
+
+    emptyMessage.style.display =
+        visibleCount === 0 ? "block" : "none";
+}
+
+searchInput.addEventListener("input", filterWorksheets);
+
+filterButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+        filterButtons.forEach(function(btn) {
+            btn.classList.remove("active");
+        });
+
+        button.classList.add("active");
+        activeFilter = button.dataset.filter;
+        filterWorksheets();
+    });
+});
+</script>
+
+</body>
+</html>
