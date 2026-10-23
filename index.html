@@ -360,44 +360,112 @@ footer p {
 </footer>
 
 <script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzHHRlYdFY2iG6_Fqo99r2lx6x87UdYPXW33EgRbLUFxns0NJEYG7FLQ3iU-Xpkb-NTgA/exec";
+
 const searchInput = document.getElementById("searchInput");
-const cards = document.querySelectorAll(".card");
+const cardsContainer = document.getElementById("worksheetContainer");
 const filterButtons = document.querySelectorAll(".filter-btn");
 const emptyMessage = document.getElementById("emptyMessage");
 
 let activeFilter = "all";
+let allWorksheets = [];
 
-function filterWorksheets() {
+function renderWorksheets() {
     const searchText = searchInput.value.toLowerCase().trim();
+
+    cardsContainer.innerHTML = "";
     let visibleCount = 0;
 
-    cards.forEach(function(card) {
-        const subject = card.dataset.subject;
-        const title = card.dataset.title;
-        const text = card.innerText.toLowerCase();
+    allWorksheets.forEach(function(worksheet) {
+        const subject = (worksheet.subject || "").toLowerCase();
+        const title = (worksheet.title || "").toLowerCase();
+        const topic = (worksheet.topic || "").toLowerCase();
+        const className = worksheet.className || "";
 
         const matchesSearch =
             title.includes(searchText) ||
             subject.includes(searchText) ||
-            text.includes(searchText);
+            topic.includes(searchText) ||
+            className.toLowerCase().includes(searchText);
 
         const matchesFilter =
             activeFilter === "all" ||
             subject === activeFilter;
 
-        if (matchesSearch && matchesFilter) {
-            card.style.display = "";
-            visibleCount++;
-        } else {
-            card.style.display = "none";
+        if (!matchesSearch || !matchesFilter) {
+            return;
         }
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.subject = subject;
+        card.dataset.title = title;
+
+        const heading = document.createElement("h3");
+        heading.textContent = worksheet.title || "Untitled Worksheet";
+
+        const subjectText = document.createElement("p");
+        subjectText.textContent = "Subject: " + (worksheet.subject || "General");
+
+        const classText = document.createElement("p");
+        classText.textContent = "Class: " + className;
+
+        const topicText = document.createElement("p");
+        topicText.textContent = "Topic: " + topic;
+
+        const link = document.createElement("a");
+        link.href = worksheet.link;
+        link.textContent = "Open Worksheet";
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "primary";
+
+        card.appendChild(heading);
+        card.appendChild(subjectText);
+        card.appendChild(classText);
+        card.appendChild(topicText);
+        card.appendChild(link);
+
+        cardsContainer.appendChild(card);
+        visibleCount++;
     });
 
     emptyMessage.style.display =
         visibleCount === 0 ? "block" : "none";
 }
 
-searchInput.addEventListener("input", filterWorksheets);
+async function loadWorksheets() {
+    emptyMessage.style.display = "block";
+    emptyMessage.textContent = "Loading worksheets...";
+
+    try {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+            throw new Error("Could not load worksheet database.");
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.message || "Worksheet database error.");
+        }
+
+        allWorksheets = data.worksheets || [];
+        renderWorksheets();
+
+        if (allWorksheets.length === 0) {
+            emptyMessage.textContent = "No worksheets available yet.";
+        }
+    } catch (error) {
+        console.error("Worksheet loading error:", error);
+        emptyMessage.textContent =
+            "Worksheets could not be loaded. Please refresh the page.";
+        emptyMessage.style.display = "block";
+    }
+}
+
+searchInput.addEventListener("input", renderWorksheets);
 
 filterButtons.forEach(function(button) {
     button.addEventListener("click", function() {
@@ -406,10 +474,12 @@ filterButtons.forEach(function(button) {
         });
 
         button.classList.add("active");
-        activeFilter = button.dataset.filter;
-        filterWorksheets();
+        activeFilter = button.dataset.filter.toLowerCase();
+        renderWorksheets();
     });
 });
+
+loadWorksheets();
 </script>
 
 </body>
