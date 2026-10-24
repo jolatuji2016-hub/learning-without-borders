@@ -1,1 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Find and practise online worksheets with Learning Without Borders.">
+<title>Learning Without Borders | Online Worksheets</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --navy: #102a56;
+    --blue: #1769aa;
+    --pale: #f3f6fb;
+    --muted: #64748b;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--pale);
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+header {
+    background: linear-gradient(135deg, var(--navy), var(--blue));
+    color: white;
+    padding: 35px 20px;
+    text-align: center;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+header p {
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.header-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    padding: 7px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.profile-credit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 22px auto 0;
+}
+
+.profile-photo {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    object-position: center 25%;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    background: white;
+}
+
+.profile-name {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: left;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 25px 16px;
+}
+
+.welcome {
+    text-align: center;
+    margin: 15px 0 25px;
+}
+
+.welcome h2 {
+    font-size: 25px;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.welcome p {
+    color: var(--muted);
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 12px;
+    margin: 22px auto 25px;
+}
+
+.controls input,
+.controls select {
+    width: 100%;
+    min-width: 0;
+    padding: 13px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: white;
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.controls input:focus,
+.controls select:focus {
+    outline: 2px solid rgba(23,105,170,0.25);
+    border-color: var(--blue);
+}
+
+.section-title {
+    font-size: 22px;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.results-count {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+.worksheet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 4px 15px rgba(15,23,42,0.06);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(15,23,42,0.10);
+}
+
+.subject-icon {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.badge {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 12px;
+    background: #e0f2fe;
+    color: #075985;
+    padding: 4px 9px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.card h3 {
+    font-size: 19px;
+    margin-bottom: 8px;
+    color: var(--navy);
+    overflow-wrap: anywhere;
+}
+
+.card p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 7px;
+    overflow-wrap: anywhere;
+}
+
+.open-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    background: var(--blue);
+    color: white;
+    padding: 11px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-top: auto;
+}
+
+.card .open-btn {
+    margin-top: 15px;
+}
+
+.open-btn:hover {
+    background: var(--navy);
+}
+
+.status-message {
+    text-align: center;
+    padding: 28px 15px;
+    color: var(--muted);
+    background: white;
+    border: 1px solid #dbe3ee;
+    border-radius: 12px;
+    margin-top: 12px;
+}
+
+.info-box {
+    background: #eaf4ff;
+    border-left: 4px solid var(--blue);
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 35px;
+}
+
+.info-box h3 {
+    color: var(--navy);
+    margin-bottom: 5px;
+}
+
+footer {
+    margin-top: 40px;
+    background: var(--navy);
+    color: white;
+    text-align: center;
+    padding: 25px 15px;
+    font-size: 14px;
+}
+
+footer p {
+    margin: 4px 0;
+}
+
+@media (max-width: 650px) {
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .logo {
+        font-size: 25px;
+    }
+
+    header {
+        padding: 28px 15px;
+    }
+
+    .welcome h2 {
+        font-size: 22px;
+    }
+
+    .worksheet-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">📚 Learning Without Borders</div>
+    <p>Learn. Practise. Improve.</p>
+
+    <span class="header-tag">
+        Your learning journey starts here!
+    </span>
+
+    <div class="profile-credit">
+        <img
+            class="profile-photo"
+            src="olatunji-joseph.png"
+            alt="Olatunji Joseph"
+        >
+        <div class="profile-name">with Olatunji Joseph</div>
+    </div>
+</header>
+
+<main>
+
+    <section class="welcome">
+        <h2>Welcome to Your Learning Centre</h2>
+        <p>
+            Choose a worksheet, answer the questions and test your knowledge.
+        </p>
+    </section>
+
+    <section class="controls" aria-label="Find worksheets">
+
+        <input
+            type="search"
+            id="searchInput"
+            placeholder="🔍 Search title, topic, subject or class..."
+            aria-label="Search worksheets"
+        >
+
+        <select id="subjectFilter" aria-label="Filter by subject">
+            <option value="all">All subjects</option>
+        </select>
+
+        <select id="classFilter" aria-label="Filter by class">
+            <option value="all">All classes</option>
+        </select>
+
+    </section>
+
+    <h2 class="section-title">Available Worksheets</h2>
+
+    <p id="resultsCount" class="results-count" aria-live="polite">
+        Loading worksheets...
+    </p>
+
+    <div id="worksheetGrid" class="worksheet-grid"></div>
+
+    <div id="statusMessage" class="status-message" role="status">
+        Loading worksheets...
+    </div>
+
+    <section class="info-box">
+        <h3>🎯 Keep Learning!</h3>
+        <p>
+            Choose an available worksheet to begin. New worksheets registered
+            in our database will appear here automatically.
+        </p>
+    </section>
+
+</main>
+
+<footer>
+    <p><strong>Learning Without Borders</strong></p>
+    <p>Learn anywhere. Practise anytime. Keep improving.</p>
+</footer>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzHHRlYdFY2iG6_Fqo99r2lx6x87UdYPXW33EgRbLUFxns0NJEYG7FLQ3iU-Xpkb-NTgA/exec";
+
+const searchInput = document.getElementById("searchInput");
+const subjectFilter = document.getElementById("subjectFilter");
+const classFilter = document.getElementById("classFilter");
+const cardsContainer = document.getElementById("worksheetGrid");
+const statusMessage = document.getElementById("statusMessage");
+const resultsCount = document.getElementById("resultsCount");
+
+let allWorksheets = [];
+
+function getClassName(item) {
+    return String(
+        item.className || item.class || item.grade || ""
+    ).trim();
+}
+
+function getSubjectIcon(subject) {
+    const value = (subject || "").toLowerCase();
+
+    if (value.includes("computer") || value.includes("ict")) return "💻";
+    if (value.includes("math")) return "📐";
+    if (value.includes("english") || value.includes("language")) return "📖";
+    if (value.includes("biology")) return "🧬";
+    if (value.includes("physics")) return "🔬";
+    if (value.includes("chemistry")) return "⚗️";
+    if (value.includes("science")) return "⚙️";
+
+    return "📝";
+}
+
+function fillFilterOptions(select, values, label) {
+    const previousValue = select.value;
+
+    select.innerHTML = "";
+
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.textContent = label;
+    select.appendChild(allOption);
+
+    values.forEach(function(value) {
+        const option = document.createElement("option");
+        option.value = value.toLowerCase();
+        option.textContent = value;
+        select.appendChild(option);
+    });
+
+    if ([...select.options].some(function(option) {
+        return option.value === previousValue;
+    })) {
+        select.value = previousValue;
+    }
+}
+
+function populateFilters() {
+    const subjects = [...new Set(
+        allWorksheets
+            .map(function(item) {
+                return String(item.subject || "").trim();
+            })
+            .filter(Boolean)
+    )].sort(function(a, b) {
+        return a.localeCompare(b);
+    });
+
+    const classes = [...new Set(
+        allWorksheets
+            .map(getClassName)
+            .filter(Boolean)
+    )].sort(function(a, b) {
+        return a.localeCompare(b, undefined, { numeric: true });
+    });
+
+    fillFilterOptions(subjectFilter, subjects, "All subjects");
+    fillFilterOptions(classFilter, classes, "All classes");
+}
+
+function renderWorksheets() {
+    const query = searchInput.value.toLowerCase().trim();
+    const selectedSubject = subjectFilter.value;
+    const selectedClass = classFilter.value;
+
+    cardsContainer.innerHTML = "";
+
+    let count = 0;
+
+    allWorksheets.forEach(function(item) {
+        const title = String(item.title || "Untitled Worksheet").trim();
+        const subject = String(item.subject || "General").trim();
+        const topic = String(item.topic || "").trim();
+        const className = getClassName(item);
+        const url = String(item.link || item.worksheetLink || "").trim();
+
+        const searchableText = [
+            title,
+            subject,
+            topic,
+            className
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = searchableText.includes(query);
+
+        const matchesSubject =
+            selectedSubject === "all" ||
+            subject.toLowerCase() === selectedSubject;
+
+        const matchesClass =
+            selectedClass === "all" ||
+            className.toLowerCase() === selectedClass;
+
+        if (!matchesSearch || !matchesSubject || !matchesClass) {
+            return;
+        }
+
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const icon = document.createElement("div");
+        icon.className = "subject-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = getSubjectIcon(subject);
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = subject;
+
+        const heading = document.createElement("h3");
+        heading.textContent = title;
+
+        card.appendChild(icon);
+        card.appendChild(badge);
+        card.appendChild(heading);
+
+        if (topic) {
+            const topicText = document.createElement("p");
+            topicText.textContent = "Topic: " + topic;
+            card.appendChild(topicText);
+        }
+
+        if (className) {
+            const classText = document.createElement("p");
+            classText.textContent = "Class: " + className;
+            card.appendChild(classText);
+        }
+
+        if (url) {
+            const link = document.createElement("a");
+            link.className = "open-btn";
+            link.href = url;
+            link.textContent = "Open Worksheet →";
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            card.appendChild(link);
+        } else {
+            const noLink = document.createElement("p");
+            noLink.textContent = "Worksheet link unavailable.";
+            card.appendChild(noLink);
+        }
+
+        cardsContainer.appendChild(card);
+        count++;
+    });
+
+    resultsCount.textContent =
+        count + (count === 1 ? " worksheet found" : " worksheets found");
+
+    if (count === 0) {
+        statusMessage.textContent = allWorksheets.length
+            ? "No worksheets match your search or filters. Try changing them."
+            : "No worksheets have been registered yet.";
+
+        statusMessage.style.display = "block";
+    } else {
+        statusMessage.style.display = "none";
+    }
+}
+
+async function loadWorksheets() {
+    statusMessage.textContent = "Loading worksheets...";
+    statusMessage.style.display = "block";
+    resultsCount.textContent = "Loading worksheets...";
+
+    try {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+            throw new Error("The worksheet database could not be reached.");
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(
+                data.message || "The worksheet database returned an error."
+            );
+        }
+
+        allWorksheets = Array.isArray(data.worksheets)
+            ? data.worksheets
+            : [];
+
+        populateFilters();
+        renderWorksheets();
+
+    } catch (error) {
+        console.error("Worksheet loading error:", error);
+
+        resultsCount.textContent = "";
+
+        statusMessage.textContent =
+            "Worksheets could not be loaded. Check your internet connection and refresh the page.";
+
+        statusMessage.style.display = "block";
+    }
+}
+
+searchInput.addEventListener("input", renderWorksheets);
+subjectFilter.addEventListener("change", renderWorksheets);
+classFilter.addEventListener("change", renderWorksheets);
+
+loadWorksheets();
+</script>
+
+</body>
+</html>
 
