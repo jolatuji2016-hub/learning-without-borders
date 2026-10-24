@@ -425,29 +425,43 @@ function fillFilterOptions(select, values, label) {
         select.value = previousValue;
     }
 }
-
 function populateFilters() {
-    const subjects = [...new Set(
-        allWorksheets
-            .map(function(item) {
-                return String(item.subject || "").trim();
-            })
-            .filter(Boolean)
-    )].sort(function(a, b) {
-        return a.localeCompare(b);
-    });
+    const subjects = [
+        "Mathematics",
+        "Further Mathematics",
+        "English",
+        "English Language",
+        "Science",
+        "Basic Science",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "Computer Studies",
+        "Other"
+    ];
 
-    const classes = [...new Set(
-        allWorksheets
-            .map(getClassName)
-            .filter(Boolean)
-    )].sort(function(a, b) {
-        return a.localeCompare(b, undefined, { numeric: true });
-    });
+    const classes = [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3",
+        "Grade 4",
+        "Grade 5",
+        "Grade 6",
+        "Grade 7",
+        "Grade 8",
+        "Grade 9",
+        "Grade 10",
+        "Grade 11",
+        "Grade 12",
+        "SS1",
+        "SS2",
+        "SS3"
+    ];
 
-    fillFilterOptions(subjectFilter, subjects, "All subjects");
-    fillFilterOptions(classFilter, classes, "All classes");
+    fillFilterOptions(subjectFilter, subjects, "All Subjects");
+    fillFilterOptions(classFilter, classes, "All Classes");
 }
+    
 
 function renderWorksheets() {
     const query = searchInput.value.toLowerCase().trim();
