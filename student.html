@@ -9,9 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -22,7 +20,7 @@
     }
 
     .container {
-      max-width: 520px;
+      max-width: 650px;
       margin: 35px auto;
       padding: 25px;
       background: white;
@@ -30,10 +28,7 @@
       box-shadow: 0 4px 15px rgba(0,0,0,.08);
     }
 
-    h2, h3 {
-      color: #123b68;
-      text-align: center;
-    }
+    h2, h3 { color: #123b68; text-align: center; }
 
     input, button {
       width: 100%;
@@ -43,9 +38,7 @@
       border-radius: 6px;
     }
 
-    input {
-      border: 1px solid #cbd5e1;
-    }
+    input { border: 1px solid #cbd5e1; }
 
     button {
       border: none;
@@ -55,13 +48,9 @@
       font-weight: bold;
     }
 
-    button:disabled {
-      opacity: .6;
-    }
+    button:disabled { opacity: .6; }
 
-    .logout {
-      background: #b42318;
-    }
+    .logout { background: #b42318; }
 
     .profile {
       padding: 15px;
@@ -70,9 +59,7 @@
       border-radius: 8px;
     }
 
-    .profile p {
-      margin: 10px 0;
-    }
+    .profile p { margin: 10px 0; }
 
     .message {
       padding: 12px;
@@ -81,15 +68,8 @@
       overflow-wrap: anywhere;
     }
 
-    .error {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .success {
-      background: #dcfce7;
-      color: #166534;
-    }
+    .error { background: #fee2e2; color: #991b1b; }
+    .success { background: #dcfce7; color: #166534; }
 
     .small {
       text-align: center;
@@ -97,86 +77,109 @@
       font-size: 13px;
     }
 
-    #dashboard, #loginMessage {
-      display: none;
+    #dashboard, #loginMessage { display: none; }
+
+    .assignment {
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      padding: 16px;
+      margin: 14px 0;
+      background: #fff;
+    }
+
+    .assignment h4 {
+      margin: 0 0 12px;
+      color: #123b68;
+      font-size: 17px;
+    }
+
+    .assignment p {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    .open-link {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      margin-top: 13px;
+      background: #123b68;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 12px;
+      text-transform: capitalize;
+    }
+
+    .section-message {
+      text-align: center;
+      color: #64748b;
+      padding: 15px;
     }
   </style>
 </head>
 
 <body>
+<div class="container">
 
-  <div class="container">
+  <h2>Learning Without Borders</h2>
+  <p class="small">Student Learning Portal</p>
 
-    <h2>Learning Without Borders</h2>
-    <p class="small">Student Learning Portal</p>
+  <section id="loginSection">
+    <h3>Student Login</h3>
 
-    <section id="loginSection">
-      <h3>Student Login</h3>
+    <form id="loginForm">
+      <input type="text" id="studentId"
+        placeholder="Enter your Student ID"
+        autocomplete="username" required>
 
-      <form id="loginForm">
+      <input type="password" id="studentPassword"
+        placeholder="Enter your password"
+        autocomplete="current-password" required>
 
-        <input
-          type="text"
-          id="studentId"
-          placeholder="Enter your Student ID"
-          autocomplete="username"
-          required
-        >
+      <button type="submit" id="loginButton">Login</button>
+    </form>
 
-        <input
-          type="password"
-          id="studentPassword"
-          placeholder="Enter your password"
-          autocomplete="current-password"
-          required
-        >
+    <div id="loginMessage" class="message"></div>
+  </section>
 
-        <button type="submit" id="loginButton">
-          Login
-        </button>
+  <section id="dashboard">
 
-      </form>
+    <h3>Welcome to Your Dashboard</h3>
 
-      <div id="loginMessage" class="message"></div>
-    </section>
+    <div class="profile">
+      <p><strong>Student Name:</strong> <span id="displayName"></span></p>
+      <p><strong>Student ID:</strong> <span id="displayId"></span></p>
+      <p><strong>Class:</strong> <span id="displayClass"></span></p>
+    </div>
 
-    <section id="dashboard">
+    <h3>My Worksheets</h3>
+    <div id="worksheetList">
+      <p class="section-message">Loading your worksheets...</p>
+    </div>
 
-      <h3>Welcome to Your Dashboard</h3>
+    <h3>My Performance</h3>
+    <p class="small">
+      Your scores and progress will appear here once results tracking is connected.
+    </p>
 
-      <div class="profile">
-        <p><strong>Student Name:</strong> <span id="displayName"></span></p>
-        <p><strong>Student ID:</strong> <span id="displayId"></span></p>
-        <p><strong>Class:</strong> <span id="displayClass"></span></p>
-      </div>
-
-      <h3>My Worksheets</h3>
-
-      <p class="small">
-        Your assigned worksheets will appear here once the assignment system is connected.
-      </p>
-
-      <h3>My Performance</h3>
-
-      <p class="small">
-        Your scores and progress will appear here once results tracking is connected.
-      </p>
-
-      <button class="logout" id="logoutButton">
-        Logout
-      </button>
-
-    </section>
-
-  </div>
+    <button class="logout" id="logoutButton">Logout</button>
+  </section>
+</div>
 
 <script>
-
-  // SUPABASE CONNECTION
   const SUPABASE_URL =
     "https://yzhqnlvhioocjumebbnb.supabase.co";
 
-  // Use the same PUBLISHABLE key used in admin.html.
   const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_fOLujlfzlMpfjQoHpmpcaQ_S1rKCt8e";
 
@@ -188,6 +191,7 @@
   const loginSection = document.getElementById("loginSection");
   const dashboard = document.getElementById("dashboard");
   const loginMessage = document.getElementById("loginMessage");
+  const worksheetList = document.getElementById("worksheetList");
 
   function showMessage(message, type) {
     loginMessage.textContent = message;
@@ -205,9 +209,7 @@
     loginSection.style.display = "block";
   }
 
-  // LOAD STUDENT PROFILE
   async function loadStudentProfile(user) {
-
     const { data, error } = await supabaseClient
       .from("student_profiles")
       .select("student_id, full_name, class_name")
@@ -219,39 +221,122 @@
       throw new Error("Student profile could not be loaded.");
     }
 
-    document.getElementById("displayName").textContent =
-      data.full_name;
-
-    document.getElementById("displayId").textContent =
-      data.student_id;
-
-    document.getElementById("displayClass").textContent =
-      data.class_name;
+    document.getElementById("displayName").textContent = data.full_name;
+    document.getElementById("displayId").textContent = data.student_id;
+    document.getElementById("displayClass").textContent = data.class_name;
 
     showDashboard();
+    await loadAssignments();
   }
 
-  // STUDENT LOGIN
+  async function loadAssignments() {
+    worksheetList.innerHTML =
+      '<p class="section-message">Loading your worksheets...</p>';
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabaseClient.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        throw new Error("Your session has expired. Please log in again.");
+      }
+
+      const response = await fetch(
+        SUPABASE_URL + "/functions/v1/get-student-assignments",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_PUBLISHABLE_KEY,
+            "Authorization": "Bearer " + sessionData.session.access_token
+          },
+          body: JSON.stringify({})
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Could not load worksheets.");
+      }
+
+      displayAssignments(result.assignments || []);
+
+    } catch (error) {
+      worksheetList.innerHTML = "";
+      const message = document.createElement("p");
+      message.className = "section-message";
+      message.textContent = error.message;
+      worksheetList.appendChild(message);
+    }
+  }
+
+  function displayAssignments(assignments) {
+    worksheetList.innerHTML = "";
+
+    if (assignments.length === 0) {
+      worksheetList.innerHTML =
+        '<p class="section-message">You have no assigned worksheets yet.</p>';
+      return;
+    }
+
+    assignments.forEach(function(item) {
+      const card = document.createElement("div");
+      card.className = "assignment";
+
+      const title = document.createElement("h4");
+      title.textContent = item.worksheet_title;
+
+      const assigned = document.createElement("p");
+      assigned.textContent = "Assigned: " + formatDate(item.assigned_at);
+
+      const due = document.createElement("p");
+      due.textContent = "Due date: " +
+        (item.due_date ? formatDate(item.due_date) : "Not specified");
+
+      const status = document.createElement("span");
+      status.className = "status";
+      status.textContent = item.status || "assigned";
+
+      const link = document.createElement("a");
+      link.className = "open-link";
+      link.href = item.worksheet_link;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Open Worksheet";
+
+      card.appendChild(title);
+      card.appendChild(assigned);
+      card.appendChild(due);
+      card.appendChild(status);
+      card.appendChild(link);
+
+      worksheetList.appendChild(card);
+    });
+  }
+
+  function formatDate(value) {
+    if (!value) return "Not specified";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "Not specified";
+
+    return date.toLocaleDateString();
+  }
+
   document.getElementById("loginForm").addEventListener(
     "submit",
     async function(event) {
-
       event.preventDefault();
 
       const button = document.getElementById("loginButton");
-
       button.disabled = true;
       button.textContent = "Logging in...";
 
       try {
-
-        const studentId = document
-          .getElementById("studentId")
-          .value.trim();
-
-        const password = document
-          .getElementById("studentPassword")
-          .value;
+        const studentId = document.getElementById("studentId").value.trim();
+        const password = document.getElementById("studentPassword").value;
 
         if (!/^[A-Za-z0-9_-]{3,30}$/.test(studentId)) {
           throw new Error("Enter a valid Student ID.");
@@ -261,11 +346,10 @@
           studentId.toLowerCase() +
           "@students.learningwithoutborders.invalid";
 
-        const { data, error } =
-          await supabaseClient.auth.signInWithPassword({
-            email: studentEmail,
-            password: password
-          });
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: studentEmail,
+          password: password
+        });
 
         if (error) {
           throw new Error("Invalid Student ID or password.");
@@ -274,23 +358,16 @@
         await loadStudentProfile(data.user);
 
       } catch (error) {
-
         showMessage(error.message, "error");
-
       } finally {
-
         button.disabled = false;
         button.textContent = "Login";
-
       }
     }
   );
 
-  // CHECK EXISTING LOGIN SESSION
   async function checkSession() {
-
-    const { data, error } =
-      await supabaseClient.auth.getSession();
+    const { data, error } = await supabaseClient.auth.getSession();
 
     if (error) return;
 
@@ -303,23 +380,16 @@
     }
   }
 
-  // LOGOUT
   document.getElementById("logoutButton").addEventListener(
     "click",
     async function() {
-
       await supabaseClient.auth.signOut();
-
       document.getElementById("studentPassword").value = "";
-
       showLogin();
-
     }
   );
 
   checkSession();
-
 </script>
-
 </body>
 </html>
