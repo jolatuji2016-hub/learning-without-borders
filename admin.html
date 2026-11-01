@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Without Borders - Admin</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+      color: #1e293b;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 35px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    }
+
+    h2 { text-align: center; color: #123b68; }
+
+    input, select, button {
+      width: 100%;
+      padding: 13px;
+      margin: 9px 0;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    input, select {
+      border: 1px solid #cbd5e1;
+    }
+
+    button {
+      border: none;
+      background: #123b68;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:disabled { opacity: .6; }
+
+    .logout { background: #b42318; }
+
+    #dashboard, #loginMessage, #registerMessage {
+      display: none;
+    }
+
+    .message {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      overflow-wrap: anywhere;
+    }
+
+    .error { background: #fee2e2; color: #991b1b; }
+    .success { background: #dcfce7; color: #166534; }
+
+    .small {
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h2>Learning Without Borders</h2>
+    <p class="small">Administrator Portal</p>
+
+    <section id="loginSection">
+      <h3>Admin Login</h3>
+
+      <form id="loginForm">
+        <input
+          type="email"
+          id="adminEmail"
+          placeholder="Administrator email"
+          required
+        >
+
+        <input
+          type="password"
+          id="adminPassword"
+          placeholder="Password"
+          required
+        >
+
+        <button type="submit" id="loginButton">Login</button>
+      </form>
+
+      <div id="loginMessage" class="message"></div>
+    </section>
+
+    <section id="dashboard">
+      <h3>Register New Student</h3>
+
+      <form id="studentForm">
+
+        <input
+          type="text"
+          id="fullName"
+          placeholder="Student full name"
+          required
+        >
+
+        <input
+          type="text"
+          id="studentId"
+          placeholder="Student ID"
+          minlength="3"
+          maxlength="30"
+          pattern="[A-Za-z0-9_-]+"
+          required
+        >
+
+        <select id="className" required>
+          <option value="">Select class</option>
+          <option>Year 1</option>
+          <option>Year 2</option>
+          <option>Year 3</option>
+          <option>Year 4</option>
+          <option>Year 5</option>
+          <option>Year 6</option>
+          <option>Year 7</option>
+          <option>Year 8</option>
+          <option>Year 9</option>
+          <option>Year 10</option>
+          <option>Year 11</option>
+          <option>Year 12</option>
+        </select>
+
+        <input
+          type="password"
+          id="studentPassword"
+          placeholder="Student password (minimum 8 characters)"
+          minlength="8"
+          required
+        >
+
+        <button type="submit" id="registerButton">
+          Register Student
+        </button>
+      </form>
+
+      <div id="registerMessage" class="message"></div>
+
+      <button class="logout" id="logoutButton">Logout</button>
+    </section>
+
+  </div>
+
+<script>
+  // SUPABASE CONNECTION
+  const SUPABASE_URL = "https://yzhqnlvhioocjumebbnb.supabase.co";
+
+  // Replace this placeholder with your Supabase PUBLISHABLE key.
+  const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  const FUNCTION_URL =
+    SUPABASE_URL + "/functions/v1/register-student";
+
+  const loginSection = document.getElementById("loginSection");
+  const dashboard = document.getElementById("dashboard");
+
+  function showMessage(element, message, type) {
+    element.textContent = message;
+    element.className = "message " + type;
+    element.style.display = "block";
+  }
+
+  function showDashboard() {
+    loginSection.style.display = "none";
+    dashboard.style.display = "block";
+  }
+
+  function showLogin() {
+    dashboard.style.display = "none";
+    loginSection.style.display = "block";
+  }
+
+  // ADMIN LOGIN
+  document.getElementById("loginForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const button = document.getElementById("loginButton");
+    const message = document.getElementById("loginMessage");
+
+    button.disabled = true;
+    button.textContent = "Logging in...";
+
+    const email = document.getElementById("adminEmail").value.trim();
+    const password = document.getElementById("adminPassword").value;
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    button.disabled = false;
+    button.textContent = "Login";
+
+    if (error) {
+      showMessage(message, error.message, "error");
+      return;
+    }
+
+    showDashboard();
+  });
+
+  // REGISTER STUDENT
+  document.getElementById("studentForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const button = document.getElementById("registerButton");
+    const message = document.getElementById("registerMessage");
+
+    button.disabled = true;
+    button.textContent = "Registering...";
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabaseClient.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        throw new Error("Please log in again.");
+      }
+
+      const token = sessionData.session.access_token;
+
+      const response = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_PUBLISHABLE_KEY,
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          full_name: document.getElementById("fullName").value.trim(),
+          student_id: document.getElementById("studentId").value.trim(),
+          class_name: document.getElementById("className").value,
+          password: document.getElementById("studentPassword").value
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Student registration failed.");
+      }
+
+      showMessage(
+        message,
+        "Student registered successfully. Student ID: " + result.student_id,
+        "success"
+      );
+
+      document.getElementById("studentForm").reset();
+
+    } catch (error) {
+      showMessage(message, error.message, "error");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Register Student";
+    }
+  });
+
+  // LOGOUT
+  document.getElementById("logoutButton").addEventListener("click", async () => {
+    await supabaseClient.auth.signOut();
+    showLogin();
+  });
+</script>
+
+</body>
+</html>
