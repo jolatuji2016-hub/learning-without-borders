@@ -2,294 +2,678 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Learning Without Borders - Admin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Without Borders - Admin Portal</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+* { box-sizing: border-box; }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      margin: 0;
-      padding: 20px;
-      color: #1e293b;
-    }
+body {
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  margin: 0;
+  padding: 15px;
+  color: #1e293b;
+}
 
-    .container {
-      max-width: 500px;
-      margin: 35px auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,.08);
-    }
+.container {
+  max-width: 850px;
+  margin: 25px auto;
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,.08);
+}
 
-    h2 { text-align: center; color: #123b68; }
+h2, h3 { color: #123b68; }
 
-    input, select, button {
-      width: 100%;
-      padding: 13px;
-      margin: 9px 0;
-      border-radius: 6px;
-      font-size: 16px;
-    }
+h2 { text-align: center; }
 
-    input, select {
-      border: 1px solid #cbd5e1;
-    }
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 6px;
+  font-size: 15px;
+}
 
-    button {
-      border: none;
-      background: #123b68;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
+input, select {
+  border: 1px solid #cbd5e1;
+}
 
-    button:disabled { opacity: .6; }
+button {
+  border: none;
+  background: #123b68;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
 
-    .logout { background: #b42318; }
+button:disabled { opacity: .6; }
 
-    #dashboard, #loginMessage, #registerMessage {
-      display: none;
-    }
+.logout { background: #b42318; }
 
-    .message {
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      overflow-wrap: anywhere;
-    }
+.section {
+  border: 1px solid #e2e8f0;
+  padding: 18px;
+  border-radius: 9px;
+  margin: 20px 0;
+}
 
-    .error { background: #fee2e2; color: #991b1b; }
-    .success { background: #dcfce7; color: #166534; }
+#dashboard, #loginMessage,
+#registerMessage, #assignmentMessage,
+#studentMessage, #historyMessage {
+  display: none;
+}
 
-    .small {
-      text-align: center;
-      color: #64748b;
-      font-size: 13px;
-    }
-  </style>
+.message {
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+
+.error { background: #fee2e2; color: #991b1b; }
+.success { background: #dcfce7; color: #166534; }
+
+.small {
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+  font-size: 14px;
+}
+
+th, td {
+  padding: 11px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+th {
+  background: #eff6ff;
+  color: #123b68;
+}
+
+a {
+  color: #1d4ed8;
+  overflow-wrap: anywhere;
+}
+
+@media(max-width: 500px) {
+  .container { padding: 15px; }
+  .section { padding: 12px; }
+}
+</style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h2>Learning Without Borders</h2>
-    <p class="small">Administrator Portal</p>
+<h2>Learning Without Borders</h2>
+<p class="small">Administrator Portal</p>
 
-    <section id="loginSection">
-      <h3>Admin Login</h3>
+<!-- ADMIN LOGIN -->
+<section id="loginSection">
+<h3>Admin Login</h3>
 
-      <form id="loginForm">
-        <input
-          type="email"
-          id="adminEmail"
-          placeholder="Administrator email"
-          required
-        >
+<form id="loginForm">
+<input type="email" id="adminEmail"
+placeholder="Administrator email" required>
 
-        <input
-          type="password"
-          id="adminPassword"
-          placeholder="Password"
-          required
-        >
+<input type="password" id="adminPassword"
+placeholder="Password" required>
 
-        <button type="submit" id="loginButton">Login</button>
-      </form>
+<button type="submit" id="loginButton">Login</button>
+</form>
 
-      <div id="loginMessage" class="message"></div>
-    </section>
+<div id="loginMessage" class="message"></div>
+</section>
 
-    <section id="dashboard">
-      <h3>Register New Student</h3>
+<!-- ADMIN DASHBOARD -->
+<section id="dashboard">
 
-      <form id="studentForm">
+<!-- STUDENT REGISTRATION -->
+<div class="section">
+<h3>Register New Student</h3>
 
-        <input
-          type="text"
-          id="fullName"
-          placeholder="Student full name"
-          required
-        >
+<form id="studentForm">
 
-        <input
-          type="text"
-          id="studentId"
-          placeholder="Student ID"
-          minlength="3"
-          maxlength="30"
-          pattern="[A-Za-z0-9_-]+"
-          required
-        >
+<input type="text" id="fullName"
+placeholder="Student full name" required>
 
-        <select id="className" required>
-          <option value="">Select class</option>
-          <option>Year 1</option>
-          <option>Year 2</option>
-          <option>Year 3</option>
-          <option>Year 4</option>
-          <option>Year 5</option>
-          <option>Year 6</option>
-          <option>Year 7</option>
-          <option>Year 8</option>
-          <option>Year 9</option>
-          <option>Year 10</option>
-          <option>Year 11</option>
-          <option>Year 12</option>
-        </select>
+<input type="text" id="studentId"
+placeholder="Student ID"
+minlength="3" maxlength="30"
+pattern="[A-Za-z0-9_-]+" required>
 
-        <input
-          type="password"
-          id="studentPassword"
-          placeholder="Student password (minimum 8 characters)"
-          minlength="8"
-          required
-        >
+<select id="className" required>
+<option value="">Select class</option>
+<option>Year 1</option>
+<option>Year 2</option>
+<option>Year 3</option>
+<option>Year 4</option>
+<option>Year 5</option>
+<option>Year 6</option>
+<option>Year 7</option>
+<option>Year 8</option>
+<option>Year 9</option>
+<option>Year 10</option>
+<option>Year 11</option>
+<option>Year 12</option>
+</select>
 
-        <button type="submit" id="registerButton">
-          Register Student
-        </button>
-      </form>
+<input type="password" id="studentPassword"
+placeholder="Student password (minimum 8 characters)"
+minlength="8" required>
 
-      <div id="registerMessage" class="message"></div>
+<button type="submit" id="registerButton">
+Register Student
+</button>
 
-      <button class="logout" id="logoutButton">Logout</button>
-    </section>
+</form>
 
-  </div>
+<div id="registerMessage" class="message"></div>
+</div>
+
+<!-- REGISTERED STUDENTS -->
+<div class="section">
+<h3>Registered Students</h3>
+
+<button type="button" id="refreshStudentsButton">
+Refresh Student List
+</button>
+
+<div id="studentMessage" class="message"></div>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Student Name</th>
+<th>Student ID</th>
+<th>Class</th>
+</tr>
+</thead>
+<tbody id="studentTable">
+<tr><td colspan="3">Loading students...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- ASSIGN WORKSHEET -->
+<div class="section">
+<h3>Assign Worksheet</h3>
+
+<form id="assignmentForm">
+
+<label for="assignmentStudent">Select Student</label>
+<select id="assignmentStudent" required>
+<option value="">Loading students...</option>
+</select>
+
+<input type="text" id="worksheetTitle"
+placeholder="Worksheet title" required>
+
+<input type="url" id="worksheetLink"
+placeholder="Worksheet URL (https://...)" required>
+
+<label for="dueDate">Due Date (optional)</label>
+<input type="date" id="dueDate">
+
+<button type="submit" id="assignButton">
+Assign Worksheet
+</button>
+
+</form>
+
+<div id="assignmentMessage" class="message"></div>
+</div>
+
+<!-- ASSIGNMENT HISTORY -->
+<div class="section">
+<h3>Assignment History</h3>
+
+<button type="button" id="refreshHistoryButton">
+Refresh Assignment History
+</button>
+
+<div id="historyMessage" class="message"></div>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Worksheet</th>
+<th>Student ID</th>
+<th>Due Date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="historyTable">
+<tr><td colspan="4">Loading assignments...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<button class="logout" id="logoutButton">Logout</button>
+
+</section>
+</div>
 
 <script>
-  // SUPABASE CONNECTION
-  const SUPABASE_URL = "https://yzhqnlvhioocjumebbnb.supabase.co";
 
-  // Replace this placeholder with your Supabase PUBLISHABLE key.
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fOLujlfzlMpfjQoHpmpcaQ_S1rKCt8e";
+// SUPABASE CONNECTION
+const SUPABASE_URL =
+"https://yzhqnlvhioocjumebbnb.supabase.co";
 
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
+const SUPABASE_PUBLISHABLE_KEY =
+"sb_publishable_fOLujlfzlMpfjQoHpmpcaQ_S1rKCt8e";
 
-  const FUNCTION_URL =
-    SUPABASE_URL + "/functions/v1/register-student";
+const supabaseClient = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_PUBLISHABLE_KEY
+);
 
-  const loginSection = document.getElementById("loginSection");
-  const dashboard = document.getElementById("dashboard");
+const REGISTER_URL =
+SUPABASE_URL + "/functions/v1/register-student";
 
-  function showMessage(element, message, type) {
-    element.textContent = message;
-    element.className = "message " + type;
-    element.style.display = "block";
+const ASSIGNMENT_URL =
+SUPABASE_URL + "/functions/v1/manage-assignments";
+
+const loginSection = document.getElementById("loginSection");
+const dashboard = document.getElementById("dashboard");
+
+function showMessage(element, message, type) {
+  element.textContent = message;
+  element.className = "message " + type;
+  element.style.display = "block";
+}
+
+function showDashboard() {
+  loginSection.style.display = "none";
+  dashboard.style.display = "block";
+}
+
+function showLogin() {
+  dashboard.style.display = "none";
+  loginSection.style.display = "block";
+}
+
+async function getAccessToken() {
+  const { data, error } =
+    await supabaseClient.auth.getSession();
+
+  if (error || !data.session) {
+    throw new Error("Your session has expired. Please log in again.");
   }
 
-  function showDashboard() {
-    loginSection.style.display = "none";
-    dashboard.style.display = "block";
+  return data.session.access_token;
+}
+
+// CALL ASSIGNMENT EDGE FUNCTION
+async function callAssignmentFunction(body) {
+  const token = await getAccessToken();
+
+  const response = await fetch(ASSIGNMENT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(body)
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Request failed.");
   }
 
-  function showLogin() {
-    dashboard.style.display = "none";
-    loginSection.style.display = "block";
-  }
+  return result;
+}
 
-  // ADMIN LOGIN
-  document.getElementById("loginForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
+// ADMIN LOGIN
+document.getElementById("loginForm").addEventListener(
+"submit", async function(event) {
 
-    const button = document.getElementById("loginButton");
-    const message = document.getElementById("loginMessage");
+  event.preventDefault();
 
-    button.disabled = true;
-    button.textContent = "Logging in...";
+  const button = document.getElementById("loginButton");
+  const message = document.getElementById("loginMessage");
 
-    const email = document.getElementById("adminEmail").value.trim();
-    const password = document.getElementById("adminPassword").value;
+  button.disabled = true;
+  button.textContent = "Logging in...";
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
+  try {
+    const email =
+      document.getElementById("adminEmail").value.trim();
 
+    const password =
+      document.getElementById("adminPassword").value;
+
+    const { error } =
+      await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+    if (error) throw error;
+
+    showDashboard();
+
+    await loadStudents();
+    await loadAssignments();
+
+  } catch (error) {
+    showMessage(message, error.message, "error");
+  } finally {
     button.disabled = false;
     button.textContent = "Login";
+  }
+});
 
-    if (error) {
-      showMessage(message, error.message, "error");
+// REGISTER STUDENT
+document.getElementById("studentForm").addEventListener(
+"submit", async function(event) {
+
+  event.preventDefault();
+
+  const button = document.getElementById("registerButton");
+  const message = document.getElementById("registerMessage");
+
+  button.disabled = true;
+  button.textContent = "Registering...";
+
+  try {
+    const token = await getAccessToken();
+
+    const response = await fetch(REGISTER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        full_name: document.getElementById("fullName").value.trim(),
+        student_id: document.getElementById("studentId").value.trim(),
+        class_name: document.getElementById("className").value,
+        password: document.getElementById("studentPassword").value
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Student registration failed.");
+    }
+
+    showMessage(
+      message,
+      "Student registered successfully. Student ID: " + result.student_id,
+      "success"
+    );
+
+    document.getElementById("studentForm").reset();
+
+    await loadStudents();
+
+  } catch (error) {
+    showMessage(message, error.message, "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Register Student";
+  }
+});
+
+// LOAD REGISTERED STUDENTS
+async function loadStudents() {
+
+  const table = document.getElementById("studentTable");
+  const dropdown = document.getElementById("assignmentStudent");
+
+  table.innerHTML =
+    '<tr><td colspan="3">Loading students...</td></tr>';
+
+  dropdown.innerHTML =
+    '<option value="">Loading students...</option>';
+
+  try {
+    const result = await callAssignmentFunction({
+      action: "list_students"
+    });
+
+    table.innerHTML = "";
+    dropdown.innerHTML =
+      '<option value="">Select a student</option>';
+
+    if (!result.students || result.students.length === 0) {
+      table.innerHTML =
+        '<tr><td colspan="3">No students registered yet.</td></tr>';
+      dropdown.innerHTML =
+        '<option value="">No students available</option>';
       return;
     }
 
-    showDashboard();
-  });
+    result.students.forEach(student => {
 
-  // REGISTER STUDENT
-  document.getElementById("studentForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
+      const row = document.createElement("tr");
 
-    const button = document.getElementById("registerButton");
-    const message = document.getElementById("registerMessage");
+      [student.full_name, student.student_id, student.class_name]
+        .forEach(value => {
+          const cell = document.createElement("td");
+          cell.textContent = value;
+          row.appendChild(cell);
+        });
 
-    button.disabled = true;
-    button.textContent = "Registering...";
+      table.appendChild(row);
 
-    try {
-      const { data: sessionData, error: sessionError } =
-        await supabaseClient.auth.getSession();
+      const option = document.createElement("option");
+      option.value = student.id;
+      option.textContent =
+        student.full_name + " (" + student.student_id + ") - " +
+        student.class_name;
 
-      if (sessionError || !sessionData.session) {
-        throw new Error("Please log in again.");
-      }
+      dropdown.appendChild(option);
+    });
 
-      const token = sessionData.session.access_token;
+    showMessage(
+      document.getElementById("studentMessage"),
+      result.students.length + " student(s) loaded successfully.",
+      "success"
+    );
 
-      const response = await fetch(FUNCTION_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_PUBLISHABLE_KEY,
-          "Authorization": "Bearer " + token
-        },
-        body: JSON.stringify({
-          full_name: document.getElementById("fullName").value.trim(),
-          student_id: document.getElementById("studentId").value.trim(),
-          class_name: document.getElementById("className").value,
-          password: document.getElementById("studentPassword").value
-        })
-      });
+  } catch (error) {
+    table.innerHTML =
+      '<tr><td colspan="3">Could not load students.</td></tr>';
 
-      const result = await response.json();
+    dropdown.innerHTML =
+      '<option value="">Unable to load students</option>';
 
-      if (!response.ok) {
-        throw new Error(result.error || "Student registration failed.");
-      }
+    showMessage(
+      document.getElementById("studentMessage"),
+      error.message,
+      "error"
+    );
+  }
+}
 
-      showMessage(
-        message,
-        "Student registered successfully. Student ID: " + result.student_id,
-        "success"
-      );
+// ASSIGN WORKSHEET
+document.getElementById("assignmentForm").addEventListener(
+"submit", async function(event) {
 
-      document.getElementById("studentForm").reset();
+  event.preventDefault();
 
-    } catch (error) {
-      showMessage(message, error.message, "error");
-    } finally {
-      button.disabled = false;
-      button.textContent = "Register Student";
+  const button = document.getElementById("assignButton");
+  const message = document.getElementById("assignmentMessage");
+
+  button.disabled = true;
+  button.textContent = "Assigning...";
+
+  try {
+    const studentId =
+      document.getElementById("assignmentStudent").value;
+
+    const title =
+      document.getElementById("worksheetTitle").value.trim();
+
+    const link =
+      document.getElementById("worksheetLink").value.trim();
+
+    const dateValue =
+      document.getElementById("dueDate").value;
+
+    const dueDate = dateValue
+      ? new Date(dateValue + "T23:59:59").toISOString()
+      : null;
+
+    const result = await callAssignmentFunction({
+      action: "create_assignment",
+      student_id: studentId,
+      worksheet_title: title,
+      worksheet_link: link,
+      due_date: dueDate
+    });
+
+    showMessage(
+      message,
+      result.message || "Worksheet assigned successfully.",
+      "success"
+    );
+
+    document.getElementById("assignmentForm").reset();
+
+    await loadAssignments();
+
+  } catch (error) {
+    showMessage(message, error.message, "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Assign Worksheet";
+  }
+});
+
+// LOAD ASSIGNMENT HISTORY
+async function loadAssignments() {
+
+  const table = document.getElementById("historyTable");
+
+  table.innerHTML =
+    '<tr><td colspan="4">Loading assignments...</td></tr>';
+
+  try {
+    const result = await callAssignmentFunction({
+      action: "list_assignments"
+    });
+
+    table.innerHTML = "";
+
+    if (!result.assignments || result.assignments.length === 0) {
+      table.innerHTML =
+        '<tr><td colspan="4">No assignments yet.</td></tr>';
+      return;
     }
-  });
 
-  // LOGOUT
-  document.getElementById("logoutButton").addEventListener("click", async () => {
-    await supabaseClient.auth.signOut();
-    showLogin();
-  });
+    result.assignments.forEach(assignment => {
+
+      const row = document.createElement("tr");
+
+      const titleCell = document.createElement("td");
+      const link = document.createElement("a");
+
+      link.href = assignment.worksheet_link;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = assignment.worksheet_title;
+
+      titleCell.appendChild(link);
+
+      const studentCell = document.createElement("td");
+      studentCell.textContent = assignment.student_id;
+
+      const dueCell = document.createElement("td");
+      dueCell.textContent = assignment.due_date
+        ? new Date(assignment.due_date).toLocaleDateString()
+        : "No due date";
+
+      const statusCell = document.createElement("td");
+      statusCell.textContent = assignment.status;
+
+      row.appendChild(titleCell);
+      row.appendChild(studentCell);
+      row.appendChild(dueCell);
+      row.appendChild(statusCell);
+
+      table.appendChild(row);
+    });
+
+    showMessage(
+      document.getElementById("historyMessage"),
+      result.assignments.length + " assignment(s) loaded.",
+      "success"
+    );
+
+  } catch (error) {
+    table.innerHTML =
+      '<tr><td colspan="4">Could not load assignments.</td></tr>';
+
+    showMessage(
+      document.getElementById("historyMessage"),
+      error.message,
+      "error"
+    );
+  }
+}
+
+// REFRESH BUTTONS
+document.getElementById("refreshStudentsButton")
+.addEventListener("click", loadStudents);
+
+document.getElementById("refreshHistoryButton")
+.addEventListener("click", loadAssignments);
+
+// LOGOUT
+document.getElementById("logoutButton").addEventListener(
+"click", async function() {
+
+  await supabaseClient.auth.signOut();
+  showLogin();
+
+});
+
+// RESTORE EXISTING ADMIN SESSION
+async function checkSession() {
+
+  const { data, error } =
+    await supabaseClient.auth.getSession();
+
+  if (error || !data.session) return;
+
+  showDashboard();
+
+  await loadStudents();
+  await loadAssignments();
+}
+
+checkSession();
+
 </script>
 
 </body>
