@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Without Borders - Student Portal</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 35px auto;
+      padding: 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    }
+
+    h2, h3 {
+      color: #123b68;
+      text-align: center;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 13px;
+      margin: 9px 0;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    input {
+      border: 1px solid #cbd5e1;
+    }
+
+    button {
+      border: none;
+      background: #123b68;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      opacity: .6;
+    }
+
+    .logout {
+      background: #b42318;
+    }
+
+    .profile {
+      padding: 15px;
+      margin: 15px 0;
+      background: #eff6ff;
+      border-radius: 8px;
+    }
+
+    .profile p {
+      margin: 10px 0;
+    }
+
+    .message {
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 6px;
+      overflow-wrap: anywhere;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .small {
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    #dashboard, #loginMessage {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h2>Learning Without Borders</h2>
+    <p class="small">Student Learning Portal</p>
+
+    <section id="loginSection">
+      <h3>Student Login</h3>
+
+      <form id="loginForm">
+
+        <input
+          type="text"
+          id="studentId"
+          placeholder="Enter your Student ID"
+          autocomplete="username"
+          required
+        >
+
+        <input
+          type="password"
+          id="studentPassword"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+          required
+        >
+
+        <button type="submit" id="loginButton">
+          Login
+        </button>
+
+      </form>
+
+      <div id="loginMessage" class="message"></div>
+    </section>
+
+    <section id="dashboard">
+
+      <h3>Welcome to Your Dashboard</h3>
+
+      <div class="profile">
+        <p><strong>Student Name:</strong> <span id="displayName"></span></p>
+        <p><strong>Student ID:</strong> <span id="displayId"></span></p>
+        <p><strong>Class:</strong> <span id="displayClass"></span></p>
+      </div>
+
+      <h3>My Worksheets</h3>
+
+      <p class="small">
+        Your assigned worksheets will appear here once the assignment system is connected.
+      </p>
+
+      <h3>My Performance</h3>
+
+      <p class="small">
+        Your scores and progress will appear here once results tracking is connected.
+      </p>
+
+      <button class="logout" id="logoutButton">
+        Logout
+      </button>
+
+    </section>
+
+  </div>
+
+<script>
+
+  // SUPABASE CONNECTION
+  const SUPABASE_URL =
+    "https://yzhqnlvhioocjumebbnb.supabase.co";
+
+  // Use the same PUBLISHABLE key used in admin.html.
+  const SUPABASE_PUBLISHABLE_KEY =
+    "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  const loginSection = document.getElementById("loginSection");
+  const dashboard = document.getElementById("dashboard");
+  const loginMessage = document.getElementById("loginMessage");
+
+  function showMessage(message, type) {
+    loginMessage.textContent = message;
+    loginMessage.className = "message " + type;
+    loginMessage.style.display = "block";
+  }
+
+  function showDashboard() {
+    loginSection.style.display = "none";
+    dashboard.style.display = "block";
+  }
+
+  function showLogin() {
+    dashboard.style.display = "none";
+    loginSection.style.display = "block";
+  }
+
+  // LOAD STUDENT PROFILE
+  async function loadStudentProfile(user) {
+
+    const { data, error } = await supabaseClient
+      .from("student_profiles")
+      .select("student_id, full_name, class_name")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !data) {
+      await supabaseClient.auth.signOut();
+      throw new Error("Student profile could not be loaded.");
+    }
+
+    document.getElementById("displayName").textContent =
+      data.full_name;
+
+    document.getElementById("displayId").textContent =
+      data.student_id;
+
+    document.getElementById("displayClass").textContent =
+      data.class_name;
+
+    showDashboard();
+  }
+
+  // STUDENT LOGIN
+  document.getElementById("loginForm").addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+      const button = document.getElementById("loginButton");
+
+      button.disabled = true;
+      button.textContent = "Logging in...";
+
+      try {
+
+        const studentId = document
+          .getElementById("studentId")
+          .value.trim();
+
+        const password = document
+          .getElementById("studentPassword")
+          .value;
+
+        if (!/^[A-Za-z0-9_-]{3,30}$/.test(studentId)) {
+          throw new Error("Enter a valid Student ID.");
+        }
+
+        const studentEmail =
+          studentId.toLowerCase() +
+          "@students.learningwithoutborders.invalid";
+
+        const { data, error } =
+          await supabaseClient.auth.signInWithPassword({
+            email: studentEmail,
+            password: password
+          });
+
+        if (error) {
+          throw new Error("Invalid Student ID or password.");
+        }
+
+        await loadStudentProfile(data.user);
+
+      } catch (error) {
+
+        showMessage(error.message, "error");
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "Login";
+
+      }
+    }
+  );
+
+  // CHECK EXISTING LOGIN SESSION
+  async function checkSession() {
+
+    const { data, error } =
+      await supabaseClient.auth.getSession();
+
+    if (error) return;
+
+    if (data.session) {
+      try {
+        await loadStudentProfile(data.session.user);
+      } catch (error) {
+        showLogin();
+      }
+    }
+  }
+
+  // LOGOUT
+  document.getElementById("logoutButton").addEventListener(
+    "click",
+    async function() {
+
+      await supabaseClient.auth.signOut();
+
+      document.getElementById("studentPassword").value = "";
+
+      showLogin();
+
+    }
+  );
+
+  checkSession();
+
+</script>
+
+</body>
+</html>
