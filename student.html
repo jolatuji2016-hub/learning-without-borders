@@ -271,6 +271,87 @@
     }
   }
 
+
+async function loadPerformance() {
+  const performance = document.getElementById("performance");
+
+  performance.innerHTML =
+    '<p class="section-message">Loading your results...</p>';
+
+  try {
+    const { data: sessionData, error: sessionError } =
+      await supabaseClient.auth.getSession();
+
+    if (sessionError || !sessionData.session) {
+      throw new Error("Please log in again to view your results.");
+    }
+
+    const user = sessionData.session.user;
+
+    const { data: results, error } = await supabaseClient
+      .from("student_results")
+      .select("worksheet_title, score, total_questions, correct_answers, submitted_at")
+      .eq("student_id", user.id)
+      .order("submitted_at", { ascending: false });
+
+    if (error) throw error;
+
+    performance.innerHTML = "";
+
+    if (!results || results.length === 0) {
+      performance.innerHTML =
+        '<p class="section-message">You have not submitted any worksheets yet.</p>';
+      return;
+    }
+
+    const totalPercentage = results.reduce(
+      (sum, item) => sum + Number(item.score || 0), 0
+    ) / results.length;
+
+    const summary = document.createElement("div");
+    summary.className = "profile";
+    summary.innerHTML =
+      "<p><strong>Worksheets completed:</strong> " + results.length + "</p>" +
+      "<p><strong>Average score:</strong> " +
+      totalPercentage.toFixed(1) + "%</p>";
+
+    performance.appendChild(summary);
+
+    results.forEach(function(item) {
+      const card = document.createElement("div");
+      card.className = "assignment";
+
+      const title = document.createElement("h4");
+      title.textContent = item.worksheet_title;
+
+      const score = document.createElement("p");
+      score.textContent =
+        "Score: " + item.correct_answers + " / " + item.total_questions;
+
+      const percentage = document.createElement("p");
+      percentage.textContent = "Percentage: " + item.score + "%";
+
+      const date = document.createElement("p");
+      date.textContent = "Submitted: " + formatDate(item.submitted_at);
+
+      card.appendChild(title);
+      card.appendChild(score);
+      card.appendChild(percentage);
+      card.appendChild(date);
+
+      performance.appendChild(card);
+    });
+
+  } catch (error) {
+    performance.innerHTML = "";
+    const message = document.createElement("p");
+    message.className = "section-message";
+    message.textContent = "Could not load results: " + error.message;
+    performance.appendChild(message);
+  }
+}
+
+  
   function displayAssignments(assignments) {
     worksheetList.innerHTML = "";
 
