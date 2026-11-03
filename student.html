@@ -387,7 +387,7 @@ function displayAssignments(assignments) {
     if (item.worksheet_id) {
       // Central worksheet
       link.href =
-        "take-worksheet.html?assignment_id=" +
+        take-worksheet.html?worksheet_id=${item.worksheet_id}
         encodeURIComponent(item.id);
     } else if (item.worksheet_link) {
       // Older external worksheet
