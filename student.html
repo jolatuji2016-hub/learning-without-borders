@@ -352,8 +352,7 @@ async function loadPerformance() {
   }
 }
 
-  
-function displayAssignments(assignments) {
+  function displayAssignments(assignments) {
   worksheetList.innerHTML = "";
 
   if (assignments.length === 0) {
@@ -387,13 +386,15 @@ function displayAssignments(assignments) {
     if (item.worksheet_id) {
       // Central worksheet
       link.href =
-        take-worksheet.html?worksheet_id=${item.worksheet_id}
-        encodeURIComponent(item.id);
+        "take-worksheet.html?worksheet_id=" +
+        encodeURIComponent(item.worksheet_id);
+
     } else if (item.worksheet_link) {
       // Older external worksheet
       link.href = item.worksheet_link;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
+
     } else {
       link.removeAttribute("href");
       link.textContent = "Worksheet link unavailable";
@@ -409,9 +410,6 @@ function displayAssignments(assignments) {
     worksheetList.appendChild(card);
   });
 }
-
-  
-  
 
   function formatDate(value) {
     if (!value) return "Not specified";
