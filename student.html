@@ -353,49 +353,65 @@ async function loadPerformance() {
 }
 
   
-  function displayAssignments(assignments) {
-    worksheetList.innerHTML = "";
+function displayAssignments(assignments) {
+  worksheetList.innerHTML = "";
 
-    if (assignments.length === 0) {
-      worksheetList.innerHTML =
-        '<p class="section-message">You have no assigned worksheets yet.</p>';
-      return;
-    }
+  if (assignments.length === 0) {
+    worksheetList.innerHTML =
+      '<p class="section-message">You have no assigned worksheets yet.</p>';
+    return;
+  }
 
-    assignments.forEach(function(item) {
-      const card = document.createElement("div");
-      card.className = "assignment";
+  assignments.forEach(function(item) {
+    const card = document.createElement("div");
+    card.className = "assignment";
 
-      const title = document.createElement("h4");
-      title.textContent = item.worksheet_title;
+    const title = document.createElement("h4");
+    title.textContent = item.worksheet_title;
 
-      const assigned = document.createElement("p");
-      assigned.textContent = "Assigned: " + formatDate(item.assigned_at);
+    const assigned = document.createElement("p");
+    assigned.textContent = "Assigned: " + formatDate(item.assigned_at);
 
-      const due = document.createElement("p");
-      due.textContent = "Due date: " +
-        (item.due_date ? formatDate(item.due_date) : "Not specified");
+    const due = document.createElement("p");
+    due.textContent = "Due date: " +
+      (item.due_date ? formatDate(item.due_date) : "Not specified");
 
-      const status = document.createElement("span");
-      status.className = "status";
-      status.textContent = item.status || "assigned";
+    const status = document.createElement("span");
+    status.className = "status";
+    status.textContent = item.status || "assigned";
 
-      const link = document.createElement("a");
-      link.className = "open-link";
+    const link = document.createElement("a");
+    link.className = "open-link";
+    link.textContent = "Open Worksheet";
+
+    if (item.worksheet_id) {
+      // Central worksheet
+      link.href =
+        "take-worksheet.html?assignment_id=" +
+        encodeURIComponent(item.id);
+    } else if (item.worksheet_link) {
+      // Older external worksheet
       link.href = item.worksheet_link;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
-      link.textContent = "Open Worksheet";
+    } else {
+      link.removeAttribute("href");
+      link.textContent = "Worksheet link unavailable";
+      link.style.background = "#64748b";
+    }
 
-      card.appendChild(title);
-      card.appendChild(assigned);
-      card.appendChild(due);
-      card.appendChild(status);
-      card.appendChild(link);
+    card.appendChild(title);
+    card.appendChild(assigned);
+    card.appendChild(due);
+    card.appendChild(status);
+    card.appendChild(link);
 
-      worksheetList.appendChild(card);
-    });
-  }
+    worksheetList.appendChild(card);
+  });
+}
+
+  
+  
 
   function formatDate(value) {
     if (!value) return "Not specified";
