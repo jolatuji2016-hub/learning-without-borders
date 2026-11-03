@@ -1,0 +1,498 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take Worksheet | Learning Without Borders</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 18px;
+      font-family: Arial, sans-serif;
+      background: #f3f6fb;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 850px;
+      margin: 20px auto;
+    }
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+    }
+    h1, h2 { color: #173b70; }
+    .question {
+      border: 1px solid #dce3ed;
+      padding: 18px;
+      border-radius: 10px;
+      margin: 18px 0;
+    }
+    .question img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 12px 0;
+      border-radius: 8px;
+    }
+    .option {
+      display: block;
+      padding: 11px;
+      margin: 8px 0;
+      background: #f5f7fa;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .option input { margin-right: 9px; }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+    button {
+      border: 0;
+      background: #1769aa;
+      color: white;
+      padding: 13px 20px;
+      border-radius: 7px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .secondary { background: #64748b; }
+    .hidden { display: none; }
+    .muted { color: #64748b; }
+    .error { color: #b91c1c; }
+    .success { color: #15803d; }
+    .result-score { font-size: 32px; font-weight: bold; }
+    .review-item {
+      border-top: 1px solid #e2e8f0;
+      padding: 12px 0;
+    }
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="card">
+    <h1>Learning Without Borders</h1>
+    <p class="muted">Online Worksheet</p>
+    <div id="status">Loading worksheet...</div>
+  </div>
+
+  <div id="worksheetArea" class="hidden">
+    <div class="card">
+      <h2 id="worksheetTitle"></h2>
+      <p id="worksheetDetails" class="muted"></p>
+      <p id="instructions"></p>
+      <p><strong>Total questions:</strong> <span id="totalQuestions"></span></p>
+    </div>
+
+    <form id="answerForm" class="card">
+      <div id="questionsContainer"></div>
+      <button type="submit" id="submitBtn">Submit Worksheet</button>
+    </form>
+  </div>
+
+  <div id="resultArea" class="card hidden">
+    <h2>Submission Result</h2>
+    <p id="resultTitle"></p>
+    <p class="result-score" id="resultPercentage"></p>
+    <p id="resultSummary"></p>
+    <p id="passStatus"></p>
+    <h3>Answer Review</h3>
+    <div id="reviewContainer"></div>
+    <button class="secondary" onclick="goToPortal()">Return to Student Portal</button>
+  </div>
+
+</div>
+
+<script>
+  // SUPABASE CONNECTION
+  const SUPABASE_URL = "https://yzhqnlvhioocjumebbnb.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_fOLujlfzlMpfjQoHpmpcaQ_S1rKCt8e";
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const params = new URLSearchParams(window.location.search);
+  const worksheetId = params.get("worksheet_id");
+
+  let currentWorksheet = null;
+  let currentQuestions = [];
+  let isSubmitting = false;
+
+  const statusBox = document.getElementById("status");
+
+  function showError(message) {
+    statusBox.className = "error";
+    statusBox.textContent = message;
+  }
+
+  function goToPortal() {
+    window.location.href = "student.html";
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[character]);
+  }
+
+  async function loadWorksheet() {
+    try {
+      if (!worksheetId) {
+        showError("Worksheet ID is missing. Please open the worksheet from your student portal.");
+        return;
+      }
+
+      const { data: sessionData, error: sessionError } =
+        await supabaseClient.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        showError("Your login session has expired. Please log in again through the student portal.");
+        return;
+      }
+
+      const token = sessionData.session.access_token;
+
+      const response = await fetch(
+        SUPABASE_URL + "/functions/v1/get-worksheet",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify({
+            worksheet_id: worksheetId
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        showError(data.error || "Unable to load this worksheet.");
+        return;
+      }
+
+      currentWorksheet = data.worksheet;
+      currentQuestions = data.questions || [];
+
+      if (currentQuestions.length === 0) {
+        showError("This worksheet has no questions yet.");
+        return;
+      }
+
+      displayWorksheet(data);
+
+    } catch (error) {
+      console.error(error);
+      showError("A connection error occurred. Please refresh and try again.");
+    }
+  }
+
+  function displayWorksheet(data) {
+    document.getElementById("worksheetTitle").textContent =
+      data.worksheet.title;
+
+    document.getElementById("worksheetDetails").textContent =
+      [data.worksheet.subject, data.worksheet.class_name, data.worksheet.topic]
+        .filter(Boolean).join(" | ");
+
+    document.getElementById("instructions").textContent =
+      data.worksheet.instructions || "Answer all questions.";
+
+    document.getElementById("totalQuestions").textContent =
+      data.total_questions;
+
+    const container = document.getElementById("questionsContainer");
+    container.innerHTML = "";
+
+    currentQuestions.forEach((question, index) => {
+      const block = document.createElement("div");
+      block.className = "question";
+
+      const heading = document.createElement("h3");
+      heading.textContent =
+        (question.question_number || index + 1) + ". " +
+        question.question_text;
+
+      block.appendChild(heading);
+
+      if (question.image_path) {
+        const image = document.createElement("img");
+        image.src = getImageUrl(question.image_path);
+        image.alt = "Question image";
+        image.onerror = () => image.remove();
+        block.appendChild(image);
+      }
+
+      const type = String(question.question_type || "mcq").toLowerCase();
+
+      if (type === "mcq") {
+        const options = question.options || {};
+
+        let optionEntries = [];
+
+        if (Array.isArray(options)) {
+          optionEntries = options.map((value, i) => [
+            String.fromCharCode(65 + i), value
+          ]);
+        } else {
+          optionEntries = Object.entries(options);
+        }
+
+        optionEntries.forEach(([key, value]) => {
+          const label = document.createElement("label");
+          label.className = "option";
+
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = question.id;
+          input.value = key;
+
+          label.appendChild(input);
+          label.appendChild(
+            document.createTextNode(
+              String(key).toUpperCase() + ". " + String(value)
+            )
+          );
+
+          block.appendChild(label);
+        });
+
+      } else if (type === "true_false") {
+        ["TRUE", "FALSE"].forEach(value => {
+          const label = document.createElement("label");
+          label.className = "option";
+
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = question.id;
+          input.value = value;
+
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(value));
+
+          block.appendChild(label);
+        });
+
+      } else if (type === "fill_gap") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = question.id;
+        input.placeholder = "Type your answer here";
+        input.autocomplete = "off";
+        block.appendChild(input);
+
+      } else {
+        const message = document.createElement("p");
+        message.className = "error";
+        message.textContent = "Unsupported question type.";
+        block.appendChild(message);
+      }
+
+      container.appendChild(block);
+    });
+
+    document.getElementById("worksheetArea").classList.remove("hidden");
+    statusBox.textContent = "Worksheet loaded. Good luck!";
+    statusBox.className = "success";
+  }
+
+  function getImageUrl(path) {
+    if (/^https?:\/\//i.test(path)) return path;
+
+    const cleanPath = String(path).replace(/^\/+/, "");
+    const { data } = supabaseClient.storage
+      .from("worksheet-images")
+      .getPublicUrl(cleanPath);
+
+    return data.publicUrl;
+  }
+
+  function collectAnswers() {
+    const answers = {};
+
+    for (const question of currentQuestions) {
+      const type = String(question.question_type || "mcq").toLowerCase();
+      const questionId = question.id;
+
+      if (type === "fill_gap") {
+        const input = document.querySelector(
+          'input[name="' + CSS.escape(questionId) + '"]'
+        );
+        answers[questionId] = input ? input.value.trim() : "";
+      } else {
+        const selected = document.querySelector(
+          'input[name="' + CSS.escape(questionId) + '"]:checked'
+        );
+        answers[questionId] = selected ? selected.value : "";
+      }
+
+      if (!String(answers[questionId]).trim()) {
+        return {
+          valid: false,
+          questionNumber: question.question_number
+        };
+      }
+    }
+
+    return { valid: true, answers };
+  }
+
+  document.getElementById("answerForm").addEventListener(
+    "submit",
+    async function(event) {
+      event.preventDefault();
+
+      if (isSubmitting) return;
+
+      const collected = collectAnswers();
+
+      if (!collected.valid) {
+        alert(
+          "Please answer every question. Check question " +
+          collected.questionNumber + "."
+        );
+        return;
+      }
+
+      const confirmed = confirm(
+        "Are you sure you want to submit your worksheet? You cannot submit it again."
+      );
+
+      if (!confirmed) return;
+
+      isSubmitting = true;
+
+      const submitButton = document.getElementById("submitBtn");
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting...";
+
+      try {
+        const { data: sessionData } =
+          await supabaseClient.auth.getSession();
+
+        if (!sessionData.session) {
+          throw new Error("Your login session has expired. Please log in again.");
+        }
+
+        const response = await fetch(
+          SUPABASE_URL + "/functions/v1/submit-central-worksheet",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_KEY,
+              "Authorization":
+                "Bearer " + sessionData.session.access_token
+            },
+            body: JSON.stringify({
+              worksheet_id: worksheetId,
+              answers: collected.answers
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Submission failed.");
+        }
+
+        showResult(data);
+
+      } catch (error) {
+        alert(error.message || "Unable to submit your worksheet.");
+
+        isSubmitting = false;
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit Worksheet";
+      }
+    }
+  );
+
+  function showResult(data) {
+    document.getElementById("worksheetArea").classList.add("hidden");
+    document.getElementById("resultArea").classList.remove("hidden");
+
+    const result = data.result;
+
+    document.getElementById("resultTitle").textContent =
+      result.worksheet_title;
+
+    document.getElementById("resultPercentage").textContent =
+      result.percentage + "%";
+
+    document.getElementById("resultSummary").textContent =
+      "You scored " + result.score + " out of " +
+      result.total_marks + " marks. You answered " +
+      result.correct_answers + " out of " +
+      result.total_questions + " questions correctly.";
+
+    const passStatus = document.getElementById("passStatus");
+    passStatus.textContent = result.passed
+      ? "Congratulations! You passed."
+      : "You did not reach the pass mark of " + result.pass_mark + "%.";
+
+    passStatus.className = result.passed ? "success" : "error";
+
+    const reviewContainer = document.getElementById("reviewContainer");
+    reviewContainer.innerHTML = "";
+
+    (data.review || []).forEach(item => {
+      const review = document.createElement("div");
+      review.className = "review-item";
+
+      const heading = document.createElement("strong");
+      heading.textContent = "Question " + item.question_number;
+
+      const answer = document.createElement("p");
+      answer.textContent =
+        "Your answer: " + (item.student_answer || "No answer");
+
+      const outcome = document.createElement("p");
+      outcome.textContent = item.correct
+        ? "Correct — " + item.marks_awarded + " mark(s)"
+        : "Incorrect — 0 marks";
+
+      outcome.className = item.correct ? "success" : "error";
+
+      review.appendChild(heading);
+      review.appendChild(answer);
+      review.appendChild(outcome);
+
+      reviewContainer.appendChild(review);
+    });
+
+    statusBox.textContent = "Your worksheet has been submitted successfully.";
+    statusBox.className = "success";
+  }
+
+  loadWorksheet();
+</script>
+</body>
+</html>
