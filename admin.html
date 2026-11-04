@@ -296,9 +296,9 @@ async function openDashboard() {
 
   await Promise.all([
     loadStudents(),
-    loadWorksheets(),
-    loadAssignments()
+    loadWorksheets()
   ]);
+  await loadAssignments();
 }
 
 async function registerStudent() {
@@ -353,7 +353,9 @@ async function loadStudents() {
         <div class="item">
           <b>${escapeHTML(s.full_name)}</b><br>
           Student ID: ${escapeHTML(s.student_id)}<br>
-          Class: ${escapeHTML(s.class_name)}
+          Class: ${escapeHTML(s.class_name)}<br>
+          <button type="button" class="secondary" onclick="editStudent('${escapeHTML(s.id)}')">Update Student</button>
+          <button type="button" class="danger" onclick="deleteStudent('${escapeHTML(s.id)}')">Delete Student</button>
         </div>`).join("")
       : "<p>No students found.</p>";
 
@@ -366,6 +368,82 @@ async function loadStudents() {
     });
   } catch(error) {
     message("Could not load students: "+error.message,true);
+  }
+}
+
+async function editStudent(profileId) {
+  const student = students.find(s => s.id === profileId);
+  if (!student) {
+    message("Student record not found. Refresh the student list.", true);
+    return;
+  }
+
+  const fullName = prompt("Update student's full name:", student.full_name);
+  if (fullName === null) return;
+
+  const studentId = prompt("Update Student ID:", student.student_id);
+  if (studentId === null) return;
+
+  const className = prompt("Update class:", student.class_name);
+  if (className === null) return;
+
+  if (!fullName.trim() || !studentId.trim() || !className.trim()) {
+    message("Full name, Student ID and class cannot be empty.", true);
+    return;
+  }
+
+  try {
+    const result = await callFunction("manage-assignments", {
+      action: "update_student",
+      profile_id: profileId,
+      full_name: fullName.trim(),
+      student_id: studentId.trim(),
+      class_name: className.trim()
+    });
+
+    message(result.message || "Student details updated successfully.");
+    await loadStudents();
+    await loadAssignments();
+  } catch (error) {
+    message(error.message, true);
+  }
+}
+
+async function deleteStudent(profileId) {
+  const student = students.find(s => s.id === profileId);
+  if (!student) {
+    message("Student record not found. Refresh the student list.", true);
+    return;
+  }
+
+  const confirmed = confirm(
+    `PERMANENT DELETION\n\n` +
+    `Student: ${student.full_name}\n` +
+    `Student ID: ${student.student_id}\n\n` +
+    `This permanently deletes the student's login, profile, assignments and results. This cannot be undone.\n\nContinue?`
+  );
+  if (!confirmed) return;
+
+  const typedConfirmation = prompt(
+    `Type DELETE to permanently remove ${student.student_id}:`
+  );
+  if (typedConfirmation !== "DELETE") {
+    message("Student deletion cancelled. The confirmation did not match.", true);
+    return;
+  }
+
+  try {
+    const result = await callFunction("manage-assignments", {
+      action: "delete_student",
+      profile_id: profileId,
+      confirmation: "DELETE"
+    });
+
+    message(result.message || "Student and related records deleted.");
+    await loadStudents();
+    await loadAssignments();
+  } catch (error) {
+    message(error.message, true);
   }
 }
 
@@ -850,11 +928,49 @@ async function loadAssignments() {
             <b>${title}</b><br>
             Student: ${escapeHTML(student?.full_name || a.student_id)}<br>
             Due: ${escapeHTML(a.due_date || "Not set")}<br>
-            Status: ${escapeHTML(a.status)}
+            Status: ${escapeHTML(a.status)}<br>
+            <button type="button" class="danger" onclick="removeAssignment('${escapeHTML(a.id)}')">Remove from Student Dashboard</button>
           </div>`;
       }).join("") : "<p>No assignments found.</p>";
   } catch(error) {
     message("Could not load assignments: "+error.message,true);
+  }
+}
+
+async function removeAssignment(assignmentId) {
+  const assignment = await (async () => {
+    try {
+      const result = await callFunction("manage-assignments", {
+        action: "list_assignments"
+      });
+      return (result.assignments || []).find(a => a.id === assignmentId);
+    } catch (error) {
+      message(error.message, true);
+      return null;
+    }
+  })();
+
+  if (!assignment) {
+    message("Assignment not found. Refresh the assignment list.", true);
+    return;
+  }
+
+  const student = students.find(s => s.id === assignment.student_id);
+  const confirmed = confirm(
+    `Remove "${assignment.worksheet_title}" from ${student?.full_name || "this student's"} dashboard?\n\n` +
+    `The original worksheet will remain available to other students. Existing result records will be retained.`
+  );
+  if (!confirmed) return;
+
+  try {
+    const result = await callFunction("manage-assignments", {
+      action: "delete_assignment",
+      assignment_id: assignmentId
+    });
+    message(result.message || "Assignment removed from the student's dashboard.");
+    await loadAssignments();
+  } catch (error) {
+    message(error.message, true);
   }
 }
 
