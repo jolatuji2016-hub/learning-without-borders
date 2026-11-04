@@ -575,50 +575,112 @@ function renderQuestions() {
 }
 
 async function editQuestion(id) {
-  const q = questions.find(item=>item.id===id);
-  if(!q) return;
+  const q = questions.find(item => item.id === id);
+  if (!q) return;
 
-  const number = prompt("Question number:",q.question_number);
-  if(number===null) return;
+  const number = prompt("Question number:", q.question_number);
+  if (number === null) return;
 
-  const text = prompt("Question text:",q.question_text);
-  if(text===null) return;
+  const text = prompt("Question text:", q.question_text);
+  if (text === null) return;
 
-  const marks = prompt("Marks:",q.marks);
-  if(marks===null) return;
+  const marks = prompt("Marks:", q.marks);
+  if (marks === null) return;
 
-  const answer = prompt("Correct answer:",q.correct_answer);
-  if(answer===null) return;
+  const answer = prompt("Correct answer:", q.correct_answer);
+  if (answer === null) return;
 
   let options = q.options || {};
 
-  if(q.question_type==="mcq") {
+  if (q.question_type === "mcq") {
     const updated = {};
-    for(const letter of ["A","B","C","D"]) {
-      const value = prompt(`Option ${letter}:`,options[letter] || "");
-      if(value===null) return;
-      updated[letter]=value;
+
+    for (const letter of ["A", "B", "C", "D"]) {
+      const value = prompt(`Option ${letter}:`, options[letter] || "");
+      if (value === null) return;
+      updated[letter] = value;
     }
-    options=updated;
+
+    options = updated;
+  }
+
+  let imagePath = q.image_path || null;
+
+  const imageAction = prompt(
+    "Image action: type UPLOAD, REMOVE or KEEP.",
+    "KEEP"
+  );
+
+  if (imageAction === null) return;
+
+  const action = imageAction.trim().toUpperCase();
+
+  if (!["UPLOAD", "REMOVE", "KEEP"].includes(action)) {
+    message("Please enter UPLOAD, REMOVE or KEEP.", true);
+    return;
   }
 
   try {
-    await callFunction("manage-worksheets",{
-      action:"update_question",
-      question_id:id,
-      updates:{
-        question_number:Number(number),
-        question_text:text.trim(),
-        marks:Number(marks),
-        correct_answer:answer.trim(),
-        options
+    if (action === "UPLOAD") {
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = "image/*";
+
+      const file = await new Promise(resolve => {
+        fileInput.onchange = () => resolve(fileInput.files[0] || null);
+        fileInput.click();
+      });
+
+      if (!file) {
+        message("No image selected.");
+        return;
+      }
+
+      if (!file.type.startsWith("image/")) {
+        throw new Error("Please select an image file.");
+      }
+
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const filePath =
+        `${q.worksheet_id}/${q.id}/${Date.now()}-${safeName}`;
+
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from("worksheet-images")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabaseClient
+        .storage
+        .from("worksheet-images")
+        .getPublicUrl(filePath);
+
+      imagePath = data.publicUrl;
+    }
+
+    if (action === "REMOVE") {
+      imagePath = null;
+    }
+
+    await callFunction("manage-worksheets", {
+      action: "update_question",
+      question_id: id,
+      updates: {
+        question_number: Number(number),
+        question_text: text.trim(),
+        marks: Number(marks),
+        correct_answer: answer.trim(),
+        options,
+        image_path: imagePath
       }
     });
 
-    message("Question updated.");
+    message("Question updated successfully.");
     await loadQuestions();
-  } catch(error) {
-    message(error.message,true);
+
+  } catch (error) {
+    message(error.message, true);
   }
 }
 
