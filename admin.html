@@ -84,6 +84,22 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div id="studentList"></div>
 </section>
 
+<!-- RESET STUDENT PASSWORD -->
+<section class="card">
+<h3>Reset Student Password</h3>
+<p class="small">Choose a student, enter a new password and confirm it before saving.</p>
+<select id="resetStudentSelect">
+<option value="">Select student</option>
+</select>
+<label for="resetNewPassword">New password</label>
+<input id="resetNewPassword" type="password" autocomplete="new-password" placeholder="Enter new password">
+<label><input id="showResetNewPassword" type="checkbox" style="width:auto;margin-right:6px" onchange="togglePasswordVisibility('resetNewPassword', this.checked)">Show new password</label>
+<label for="resetConfirmPassword">Confirm new password</label>
+<input id="resetConfirmPassword" type="password" autocomplete="new-password" placeholder="Re-enter new password">
+<label><input id="showResetConfirmPassword" type="checkbox" style="width:auto;margin-right:6px" onchange="togglePasswordVisibility('resetConfirmPassword', this.checked)">Show confirmation</label>
+<button onclick="resetStudentPassword()">Reset Student Password</button>
+</section>
+
 <!-- CREATE WORKSHEET -->
 <section class="card">
 <h3>Create New Worksheet</h3>
@@ -341,12 +357,58 @@ async function loadStudents() {
         </div>`).join("")
       : "<p>No students found.</p>";
 
-    ["assignStudent","externalStudent"].forEach(id=>{
-      document.getElementById(id).innerHTML =
-        '<option value="">Select student</option>' + options;
+    ["assignStudent","externalStudent","resetStudentSelect"].forEach(id=>{
+      const select = document.getElementById(id);
+      if (select) {
+        select.innerHTML =
+          '<option value="">Select student</option>' + options;
+      }
     });
   } catch(error) {
     message("Could not load students: "+error.message,true);
+  }
+}
+
+function togglePasswordVisibility(inputId, show) {
+  const input = document.getElementById(inputId);
+  if (input) input.type = show ? "text" : "password";
+}
+
+async function resetStudentPassword() {
+  try {
+    const studentId = document.getElementById("resetStudentSelect").value;
+    const newPassword = document.getElementById("resetNewPassword").value;
+    const confirmPassword = document.getElementById("resetConfirmPassword").value;
+
+    if (!studentId) throw new Error("Please select a student.");
+    if (!newPassword || !confirmPassword) {
+      throw new Error("Enter and confirm the new password.");
+    }
+    if (newPassword.length < 8) {
+      throw new Error("Password must contain at least 8 characters.");
+    }
+    if (newPassword !== confirmPassword) {
+      throw new Error("The passwords do not match.");
+    }
+
+    const selectedStudent = students.find(student => student.id === studentId);
+    if (!selectedStudent) throw new Error("Student not found. Refresh the student list.");
+
+    const result = await callFunction("manage-assignments", {
+      action: "reset_student_password",
+      student_id: selectedStudent.student_id,
+      new_password: newPassword
+    });
+
+    message(result.message || "Student password reset successfully.");
+    document.getElementById("resetNewPassword").value = "";
+    document.getElementById("resetConfirmPassword").value = "";
+    document.getElementById("showResetNewPassword").checked = false;
+    document.getElementById("showResetConfirmPassword").checked = false;
+    togglePasswordVisibility("resetNewPassword", false);
+    togglePasswordVisibility("resetConfirmPassword", false);
+  } catch (error) {
+    message(error.message, true);
   }
 }
 
