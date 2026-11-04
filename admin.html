@@ -288,29 +288,36 @@ async function openDashboard() {
 async function registerStudent() {
   try {
     const payload = {
-      full_name:document.getElementById("studentName").value.trim(),
-      student_id:document.getElementById("studentId").value.trim(),
-      class_name:document.getElementById("studentClass").value,
-      email:document.getElementById("studentEmail").value.trim(),
-      password:document.getElementById("studentPassword").value
+      full_name: document.getElementById("studentName").value.trim(),
+      student_id: document.getElementById("studentId").value.trim(),
+      class_name: document.getElementById("studentClass").value,
+      email: document.getElementById("studentEmail").value.trim(),
+      password: document.getElementById("studentPassword").value
     };
 
-    if(!payload.full_name || !payload.student_id ||
-       !payload.class_name || !payload.email || !payload.password) {
-      throw new Error("Please complete all student details.");
+    if (
+      !payload.full_name ||
+      !payload.student_id ||
+      !payload.class_name ||
+      !payload.password
+    ) {
+      throw new Error("Please enter the student's name, Student ID, class and password.");
     }
 
-    await callFunction("register-student",payload);
+    await callFunction("register-student", payload);
+
     message("Student registered successfully.");
 
-    ["studentName","studentId","studentEmail","studentPassword"]
-      .forEach(id=>document.getElementById(id).value="");
+    ["studentName", "studentId", "studentEmail", "studentPassword"]
+      .forEach(id => document.getElementById(id).value = "");
 
     await loadStudents();
+
   } catch(error) {
-    message(error.message,true);
+    message(error.message, true);
   }
 }
+  
 
 async function loadStudents() {
   try {
