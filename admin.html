@@ -197,6 +197,53 @@ ANSWER: B"></textarea>
 <button onclick="assignExternal()">Assign External Worksheet</button>
 </section>
 
+<!-- STUDENT PERFORMANCE DASHBOARD -->
+<section class="card">
+  <h3>Student Performance</h3>
+
+  <button class="secondary" onclick="loadPerformance()">
+    Refresh Performance
+  </button>
+
+  <div class="row">
+    <div class="item">
+      <b>Total Submissions</b>
+      <h2 id="totalSubmissions">0</h2>
+    </div>
+
+    <div class="item">
+      <b>Passed</b>
+      <h2 id="totalPassed">0</h2>
+    </div>
+
+    <div class="item">
+      <b>Failed</b>
+      <h2 id="totalFailed">0</h2>
+    </div>
+  </div>
+
+  <input
+    type="search"
+    id="performanceSearch"
+    placeholder="Search student name or admission number"
+    oninput="filterPerformance()"
+  >
+
+  <div class="row">
+    <select id="performanceClass" onchange="filterPerformance()">
+      <option value="">All Classes</option>
+    </select>
+
+    <select id="performanceWorksheet" onchange="filterPerformance()">
+      <option value="">All Worksheets</option>
+    </select>
+  </div>
+
+  <div id="performanceList">
+    <p class="small">Click Refresh Performance to load results.</p>
+  </div>
+</section>
+
 <!-- ASSIGNMENT HISTORY -->
 <section class="card">
 <h3>Assignment History</h3>
