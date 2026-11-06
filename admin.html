@@ -1223,7 +1223,113 @@ function renderPerformance(results) {
     </div>
   `;
 }
-  
+  // ===============================
+// INDIVIDUAL STUDENT REPORT
+// ===============================
+
+function viewStudentReport(studentId) {
+  const studentResults = performanceResults.filter(
+    r => r.student_id === studentId
+  );
+
+  if (studentResults.length === 0) {
+    alert("No performance records found for this student.");
+    return;
+  }
+
+  const student = studentResults[0];
+
+  const average = studentResults.reduce(
+    (sum, r) => sum + Number(r.score || 0), 0
+  ) / studentResults.length;
+
+  const passed = studentResults.filter(
+    r => r.status === "Pass"
+  ).length;
+
+  const failed = studentResults.filter(
+    r => r.status === "Fail"
+  ).length;
+
+  const content = document.getElementById("studentReportContent");
+
+  content.innerHTML = `
+    <h3>${performanceEscapeHTML(student.student_name)}</h3>
+
+    <p>
+      <b>Admission Number:</b>
+      ${performanceEscapeHTML(student.admission_number)}
+    </p>
+
+    <p>
+      <b>Class:</b>
+      ${performanceEscapeHTML(student.class_name)}
+    </p>
+
+    <div class="row">
+      <div class="item">
+        <b>Worksheets</b>
+        <h2>${studentResults.length}</h2>
+      </div>
+
+      <div class="item">
+        <b>Average Score</b>
+        <h2>${average.toFixed(1)}%</h2>
+      </div>
+
+      <div class="item">
+        <b>Passed</b>
+        <h2>${passed}</h2>
+      </div>
+
+      <div class="item">
+        <b>Failed</b>
+        <h2>${failed}</h2>
+      </div>
+    </div>
+
+    <h4>Worksheet History</h4>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; min-width:600px;">
+        <thead>
+          <tr>
+            <th>Worksheet</th>
+            <th>Score</th>
+            <th>Correct</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${studentResults.map(r => `
+            <tr>
+              <td>${performanceEscapeHTML(r.worksheet_title)}</td>
+              <td>${performanceEscapeHTML(r.score)}%</td>
+              <td>
+                ${performanceEscapeHTML(r.correct_answers)}
+                /
+                ${performanceEscapeHTML(r.total_questions)}
+              </td>
+              <td>${performanceEscapeHTML(r.status || "Not available")}</td>
+              <td>
+                ${r.submitted_at
+                  ? performanceEscapeHTML(new Date(r.submitted_at).toLocaleDateString())
+                  : "N/A"}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  const report = document.getElementById("studentReport");
+
+  report.classList.remove("hidden");
+  report.scrollIntoView({ behavior: "smooth" });
+}
 </script>
 </body>
 </html>
