@@ -1198,7 +1198,16 @@ function renderPerformance(results) {
 
             return `
               <tr>
-                <td>${performanceEscapeHTML(r.student_name)}</td>
+                <td>
+  ${performanceEscapeHTML(r.student_name)}
+  <br>
+  <button
+    type="button"
+    class="secondary"
+    onclick="viewStudentReport('${performanceEscapeHTML(r.student_id)}')">
+    View Report
+  </button>
+</td>
                 <td>${performanceEscapeHTML(r.admission_number)}</td>
                 <td>${performanceEscapeHTML(r.class_name)}</td>
                 <td>${performanceEscapeHTML(r.worksheet_title)}</td>
