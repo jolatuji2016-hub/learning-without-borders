@@ -1036,6 +1036,182 @@ supabaseClient.auth.onAuthStateChange((event,session)=>{
 });
 
 checkSession();
+
+// ===============================
+// STUDENT PERFORMANCE DASHBOARD
+// ===============================
+
+let performanceResults = [];
+
+function performanceEscapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
+
+async function loadPerformance() {
+  const container = document.getElementById("performanceList");
+
+  container.innerHTML = "<p>Loading student results...</p>";
+
+  try {
+    const response = await callFunction("get-admin-performance", {});
+
+    if (!response || !response.success) {
+      throw new Error(response?.error || "Unable to load performance.");
+    }
+
+    performanceResults = response.results || [];
+
+    // Update summary figures
+    document.getElementById("totalSubmissions").textContent =
+      performanceResults.length;
+
+    document.getElementById("totalPassed").textContent =
+      performanceResults.filter(r => r.status === "Pass").length;
+
+    document.getElementById("totalFailed").textContent =
+      performanceResults.filter(r => r.status === "Fail").length;
+
+    // Populate class filter
+    const classSelect = document.getElementById("performanceClass");
+    const selectedClass = classSelect.value;
+
+    const classes = [...new Set(
+      performanceResults.map(r => r.class_name).filter(Boolean)
+    )].sort();
+
+    classSelect.innerHTML =
+      '<option value="">All Classes</option>' +
+      classes.map(c =>
+        `<option value="${performanceEscapeHTML(c)}">${performanceEscapeHTML(c)}</option>`
+      ).join("");
+
+    classSelect.value = selectedClass;
+
+    // Populate worksheet filter
+    const worksheetSelect =
+      document.getElementById("performanceWorksheet");
+
+    const selectedWorksheet = worksheetSelect.value;
+
+    const worksheets = [...new Set(
+      performanceResults.map(r => r.worksheet_title).filter(Boolean)
+    )].sort();
+
+    worksheetSelect.innerHTML =
+      '<option value="">All Worksheets</option>' +
+      worksheets.map(w =>
+        `<option value="${performanceEscapeHTML(w)}">${performanceEscapeHTML(w)}</option>`
+      ).join("");
+
+    worksheetSelect.value = selectedWorksheet;
+
+    filterPerformance();
+
+  } catch (error) {
+    container.innerHTML =
+      `<p>${performanceEscapeHTML(error.message)}</p>`;
+  }
+}
+
+
+function filterPerformance() {
+  const search = document
+    .getElementById("performanceSearch")
+    .value.toLowerCase().trim();
+
+  const selectedClass =
+    document.getElementById("performanceClass").value;
+
+  const selectedWorksheet =
+    document.getElementById("performanceWorksheet").value;
+
+  const filtered = performanceResults.filter(r => {
+    const name = (r.student_name || "").toLowerCase();
+    const admission = (r.admission_number || "").toLowerCase();
+
+    const matchesSearch =
+      name.includes(search) || admission.includes(search);
+
+    const matchesClass =
+      !selectedClass || r.class_name === selectedClass;
+
+    const matchesWorksheet =
+      !selectedWorksheet || r.worksheet_title === selectedWorksheet;
+
+    return matchesSearch && matchesClass && matchesWorksheet;
+  });
+
+  renderPerformance(filtered);
+}
+
+
+function renderPerformance(results) {
+  const container = document.getElementById("performanceList");
+
+  if (results.length === 0) {
+    container.innerHTML = "<p>No student results found.</p>";
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; min-width:750px;">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Admission No.</th>
+            <th>Class</th>
+            <th>Worksheet</th>
+            <th>Score</th>
+            <th>Correct Answers</th>
+            <th>Pass Mark</th>
+            <th>Status</th>
+            <th>Date Submitted</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${results.map(r => {
+            const status = r.status || "Not available";
+
+            const date = r.submitted_at
+              ? new Date(r.submitted_at).toLocaleString()
+              : "Not available";
+
+            return `
+              <tr>
+                <td>${performanceEscapeHTML(r.student_name)}</td>
+                <td>${performanceEscapeHTML(r.admission_number)}</td>
+                <td>${performanceEscapeHTML(r.class_name)}</td>
+                <td>${performanceEscapeHTML(r.worksheet_title)}</td>
+                <td>${performanceEscapeHTML(r.score)}%</td>
+                <td>
+                  ${performanceEscapeHTML(r.correct_answers)}
+                  /
+                  ${performanceEscapeHTML(r.total_questions)}
+                </td>
+                <td>
+                  ${r.pass_mark == null
+                    ? "N/A"
+                    : performanceEscapeHTML(r.pass_mark) + "%"}
+                </td>
+                <td>${performanceEscapeHTML(status)}</td>
+                <td>${performanceEscapeHTML(date)}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+  
 </script>
 </body>
 </html>
