@@ -99,9 +99,21 @@
       <p id="worksheetDetails" class="muted"></p>
       <p id="instructions"></p>
       <p><strong>Total questions:</strong> <span id="totalQuestions"></span></p>
-    </div>
+          </div>
+      
+<div id="startPanel" style="margin-top:20px; padding:18px; background:#eff6ff; border-radius:10px;">
+  <h3>Before You Begin</h3>
+  <p>You must remain in full-screen mode while answering this worksheet.</p>
+  <p>Switching tabs, leaving full-screen mode, or attempting restricted actions will be recorded.</p>
+  <p>Three recorded violations will automatically submit your worksheet.</p>
+  <button type="button" id="startWorksheetBtn">
+    Start Worksheet in Full Screen
+  </button>
+  <p id="startMessage" class="error"></p>
+</div>
 
-    <form id="answerForm" class="card">
+
+    <form id="answerForm" class="card hidden">
       <div id="questionsContainer"></div>
       <button type="submit" id="submitBtn">Submit Worksheet</button>
     </form>
