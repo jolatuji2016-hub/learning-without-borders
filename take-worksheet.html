@@ -621,6 +621,156 @@ async function startWorksheet() {
     statusBox.className = "success";
   }
 
+// AUTOMATIC SUBMISSION AFTER THREE VIOLATIONS
+async function automaticSubmit() {
+  if (isSubmitting || securitySubmitting) return;
+
+  securitySubmitting = true;
+  isSubmitting = true;
+
+  const submitButton = document.getElementById("submitBtn");
+  submitButton.disabled = true;
+  submitButton.textContent = "Automatically submitting...";
+
+  showSecurityWarning(
+    "Three security violations recorded. Your worksheet is being submitted automatically."
+  );
+
+  // Collect all answers, including unanswered questions.
+  const answers = {};
+
+  for (const question of currentQuestions) {
+    const type = String(question.question_type || "mcq").toLowerCase();
+    const questionId = question.id;
+
+    if (type === "fill_gap") {
+      const input = document.querySelector(
+        'input[name="' + CSS.escape(questionId) + '"]'
+      );
+      answers[questionId] = input ? input.value.trim() : "";
+    } else {
+      const selected = document.querySelector(
+        'input[name="' + CSS.escape(questionId) + '"]:checked'
+      );
+      answers[questionId] = selected ? selected.value : "";
+    }
+  }
+
+  try {
+    const { data: sessionData } =
+      await supabaseClient.auth.getSession();
+
+    if (!sessionData.session) {
+      throw new Error("Your login session has expired.");
+    }
+
+    const response = await fetch(
+      SUPABASE_URL + "/functions/v1/submit-central-worksheet",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + sessionData.session.access_token
+        },
+        body: JSON.stringify({
+          worksheet_id: worksheetId,
+          answers: answers,
+          auto_submit: true
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Automatic submission failed.");
+    }
+
+    showResult(data);
+
+  } catch (error) {
+    console.error("Automatic submission error:", error);
+
+    showSecurityWarning(
+      "Automatic submission failed: " + error.message +
+      " Please contact your teacher immediately."
+    );
+
+    isSubmitting = false;
+    securitySubmitting = false;
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit Worksheet";
+  }
+}
+
+// START BUTTON
+document.getElementById("startWorksheetBtn").addEventListener(
+  "click",
+  startWorksheet
+);
+
+// DETECT TAB SWITCHING OR MINIMISING
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && worksheetStarted) {
+    recordSecurityViolation(
+      "tab_hidden",
+      "Student switched tabs or left the worksheet."
+    );
+  }
+});
+
+// DETECT FULL-SCREEN EXIT
+document.addEventListener("fullscreenchange", () => {
+  if (
+    worksheetStarted &&
+    fullscreenWasEntered &&
+    !document.fullscreenElement
+  ) {
+    recordSecurityViolation(
+      "fullscreen_exit",
+      "Student exited full-screen mode."
+    );
+  }
+});
+
+// RESTRICT COPYING, PASTING AND RIGHT-CLICKING
+const questionsContainer =
+  document.getElementById("questionsContainer");
+
+questionsContainer.addEventListener("copy", (event) => {
+  if (!worksheetStarted) return;
+
+  event.preventDefault();
+
+  recordSecurityViolation(
+    "copy_attempt",
+    "Student attempted to copy worksheet content."
+  );
+});
+
+questionsContainer.addEventListener("paste", (event) => {
+  if (!worksheetStarted) return;
+
+  event.preventDefault();
+
+  recordSecurityViolation(
+    "paste_attempt",
+    "Student attempted to paste into the worksheet."
+  );
+});
+
+questionsContainer.addEventListener("contextmenu", (event) => {
+  if (!worksheetStarted) return;
+
+  event.preventDefault();
+
+  recordSecurityViolation(
+    "context_menu",
+    "Student attempted to open the context menu."
+  );
+});
+  
   loadWorksheet();
 </script>
 </body>
