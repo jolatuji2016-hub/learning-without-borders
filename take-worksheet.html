@@ -112,6 +112,15 @@
   <p id="startMessage" class="error"></p>
 </div>
 
+<div id="securityWarning" class="hidden" style="background:#fff1f2; color:#991b1b; padding:12px; border-radius:8px; margin-top:15px;">
+  Security warning will appear here.
+</div>
+
+<p style="margin-top:12px;">
+  <strong>Security violations:</strong>
+  <span id="violationCounter">0 / 3</span>
+</p>
+
 
     <form id="answerForm" class="card hidden">
       <div id="questionsContainer"></div>
@@ -148,6 +157,114 @@
   let currentWorksheet = null;
   let currentQuestions = [];
   let isSubmitting = false;
+
+  
+// WORKSHEET SECURITY SETTINGS
+const MAX_VIOLATIONS = 3;
+
+let worksheetStarted = false;
+let violationCount = 0;
+let securitySubmitting = false;
+let fullscreenWasEntered = false;
+let lastViolationTime = 0;
+
+function showSecurityWarning(message) {
+  const warning = document.getElementById("securityWarning");
+  if (warning) {
+    warning.textContent = message;
+    warning.classList.remove("hidden");
+  }
+}
+
+async function recordSecurityViolation(eventType, details = "") {
+  if (!worksheetStarted || isSubmitting || securitySubmitting) return;
+
+  // Prevent repeated events from being counted within 2 seconds.
+  const now = Date.now();
+  if (now - lastViolationTime < 2000) return;
+  lastViolationTime = now;
+
+  try {
+    const { data: sessionData } =
+      await supabaseClient.auth.getSession();
+
+    if (!sessionData.session) {
+      showSecurityWarning("Your session has expired. Contact your teacher.");
+      return;
+    }
+
+    const response = await fetch(
+      SUPABASE_URL + "/functions/v1/record-worksheet-violation",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + sessionData.session.access_token
+        },
+        body: JSON.stringify({
+          worksheet_id: worksheetId,
+          event_type: eventType,
+          details: details
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      console.error("Security recording failed:", data.error);
+      showSecurityWarning("Security monitoring could not record an event. Please contact your teacher.");
+      return;
+    }
+
+    violationCount = data.violation_count;
+
+    const counter = document.getElementById("violationCounter");
+    if (counter) {
+      counter.textContent = violationCount + " / " + MAX_VIOLATIONS;
+    }
+
+    showSecurityWarning(
+      "Warning: " + eventType.replace(/_/g, " ") +
+      " detected. Violation " + violationCount +
+      " of " + MAX_VIOLATIONS + "."
+    );
+
+    if (data.should_auto_submit) {
+      await automaticSubmit();
+    }
+
+  } catch (error) {
+    console.error("Security error:", error);
+    showSecurityWarning("Unable to contact security monitoring. Please contact your teacher.");
+  }
+}
+
+async function startWorksheet() {
+  const message = document.getElementById("startMessage");
+
+  if (!document.documentElement.requestFullscreen) {
+    message.textContent =
+      "Full-screen mode is not supported by this browser. Please use a supported browser or contact your teacher.";
+    return;
+  }
+
+  try {
+    await document.documentElement.requestFullscreen();
+
+    worksheetStarted = true;
+    fullscreenWasEntered = true;
+
+    document.getElementById("startPanel").classList.add("hidden");
+    document.getElementById("answerForm").classList.remove("hidden");
+
+  } catch (error) {
+    message.textContent =
+      "Unable to enter full-screen mode. Please allow full-screen access and try again.";
+  }
+}
+
 
   const statusBox = document.getElementById("status");
 
