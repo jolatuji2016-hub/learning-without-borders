@@ -72,9 +72,26 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <section id="loginSection" class="card">
 <h3>Admin Login</h3>
 <input id="email" type="email" placeholder="Admin email">
-<input id="password" type="password" placeholder="Password">
+
+  <div style="position:relative;">
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+    style="padding-right:85px;"
+  >
+
+  <button
+    type="button"
+    onclick="toggleLoginPassword()"
+    id="toggleLoginPasswordBtn"
+    style="position:absolute;right:5px;top:7px;width:auto;margin:0;padding:5px 10px;background:#475569;"
+  >
+    Show
+  </button>
+</div>
+
 <button onclick="login()">Login</button>
-</section>
 
 <div id="dashboard" class="hidden">
 
