@@ -23,7 +23,34 @@ button.danger{background:#b91c1c}
 button:disabled{opacity:.5;cursor:not-allowed}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .hidden{display:none}
-.message{padding:12px;margin:10px 0;border-radius:6px;background:#e0f2fe;color:#075985}
+
+  .message{
+  position:fixed;
+  top:18px;
+  right:18px;
+  z-index:9999;
+  width:min(420px, calc(100vw - 36px));
+  padding:15px 18px;
+  margin:0;
+  border-radius:8px;
+  box-shadow:0 4px 15px #00000025;
+  font-size:15px;
+  font-weight:bold;
+  animation:toastSlide 0.3s ease;
+}
+
+@keyframes toastSlide{
+  from{opacity:0;transform:translateY(-15px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:650px){
+  .message{
+    top:12px;
+    right:12px;
+    width:calc(100% - 24px);
+  }
+}
 .item{border:1px solid #dbe1ea;padding:12px;margin:10px 0;border-radius:7px}
 .small{font-size:13px;color:#64748b}
 .status{font-weight:bold}
@@ -39,7 +66,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <main>
 
-<div id="message" class="hidden message"></div>
+<div id="message" class="hidden message" role="alert" aria-live="polite"></div> 
 
 <!-- LOGIN -->
 <section id="loginSection" class="card">
@@ -283,13 +310,23 @@ let students = [];
 let worksheets = [];
 let questions = [];
 
+let messageTimer;
+
 function message(text, error=false) {
   const box = document.getElementById("message");
+
+  clearTimeout(messageTimer);
+
   box.textContent = text;
+
   box.style.background = error ? "#fee2e2" : "#dcfce7";
   box.style.color = error ? "#991b1b" : "#166534";
+
   box.classList.remove("hidden");
-  window.scrollTo({top:0,behavior:"smooth"});
+
+  messageTimer = setTimeout(() => {
+    box.classList.add("hidden");
+  }, 4000);
 }
 
 function escapeHTML(value) {
