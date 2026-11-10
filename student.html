@@ -141,10 +141,25 @@
       <input type="text" id="studentId"
         placeholder="Enter your Student ID"
         autocomplete="username" required>
+<div style="position:relative;">
+  <input
+    type="password"
+    id="studentPassword"
+    placeholder="Enter your password"
+    autocomplete="current-password"
+    required
+    style="padding-right:85px;"
+  >
 
-      <input type="password" id="studentPassword"
-        placeholder="Enter your password"
-        autocomplete="current-password" required>
+  <button
+    type="button"
+    id="toggleStudentPasswordBtn"
+    onclick="toggleStudentPassword()"
+    style="position:absolute;right:5px;top:16px;width:auto;margin:0;padding:7px 12px;font-size:13px;background:#475569;"
+  >
+    Show
+  </button>
+</div> 
 
       <button type="submit" id="loginButton">Login</button>
     </form>
@@ -485,6 +500,19 @@ async function loadPerformance() {
     }
   );
 
+function toggleStudentPassword() {
+  const password = document.getElementById("studentPassword");
+  const button = document.getElementById("toggleStudentPasswordBtn");
+
+  if (password.type === "password") {
+    password.type = "text";
+    button.textContent = "Hide";
+  } else {
+    password.type = "password";
+    button.textContent = "Show";
+  }
+}
+  
   checkSession();
 </script>
 </body>
