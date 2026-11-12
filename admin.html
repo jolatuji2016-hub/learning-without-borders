@@ -459,6 +459,11 @@ async function openDashboard() {
     loadStudents(),
     loadWorksheets()
   ]);
+
+  // Load learning materials
+  loadMaterialClasses();
+  await loadLearningMaterials();
+
   await loadAssignments();
   await loadPerformance();
 }
