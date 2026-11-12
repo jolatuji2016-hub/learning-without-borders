@@ -164,6 +164,50 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <h3>My Worksheets</h3>
 <button class="secondary" onclick="loadWorksheets()">Refresh Worksheets</button>
 <div id="worksheetList"></div>
+  <!-- LEARNING MATERIALS -->
+<div class="card">
+  <h3>Learning Materials (PDF)</h3>
+
+  <label>PDF Title</label>
+  <input
+    type="text"
+    id="materialTitle"
+    placeholder="Enter PDF title"
+  >
+
+  <label>Description</label>
+  <textarea
+    id="materialDescription"
+    placeholder="Enter a short description"
+  ></textarea>
+
+  <label>Who should receive this material?</label>
+  <select id="materialAudience" onchange="toggleMaterialClasses()">
+    <option value="all">All Students</option>
+    <option value="classes">Selected Classes</option>
+  </select>
+
+  <div id="materialClassSection" class="hidden">
+    <label>Select Classes</label>
+    <div id="materialClassList"></div>
+  </div>
+
+  <label>Select PDF File</label>
+  <input
+    type="file"
+    id="materialFile"
+    accept="application/pdf,.pdf"
+  >
+
+  <button type="button" onclick="uploadLearningMaterial()">
+    Upload PDF
+  </button>
+
+  <h3>Uploaded Learning Materials</h3>
+  <div id="learningMaterialsList">
+    <p>No materials loaded yet.</p>
+  </div>
+</div>
 </section>
 
 <!-- BULK IMPORT -->
