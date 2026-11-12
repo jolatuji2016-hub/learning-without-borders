@@ -1168,12 +1168,85 @@ supabaseClient.auth.onAuthStateChange((event,session)=>{
 // LEARNING MATERIALS - ADMIN FUNCTIONS
 // =====================================
 
-function toggleMaterialClasses() {
-  const audience = document.getElementById("materialAudience").value;
-  const section = document.getElementById("materialClassSection");
 
-  section.classList.toggle("hidden", audience !== "classes");
+function toggleMaterialRecipients() {
+  const audience = document.getElementById("materialAudience").value;
+
+  const classSection = document.getElementById("materialClassSection");
+  const studentSection = document.getElementById("materialStudentSection");
+
+  classSection.classList.toggle("hidden", audience !== "classes");
+  studentSection.classList.toggle("hidden", audience !== "students");
+
+  if (audience === "students") {
+    loadMaterialStudents();
+  }
 }
+
+function loadMaterialStudents() {
+  const container = document.getElementById("materialStudentList");
+
+  // Avoid rebuilding the list and losing existing selections
+  if (container.children.length > 0) return;
+
+  container.innerHTML = "";
+
+  if (!students || students.length === 0) {
+    container.textContent = "No registered students found.";
+    return;
+  }
+
+  students.forEach(student => {
+    const label = document.createElement("label");
+
+    label.style.display = "block";
+    label.style.margin = "8px 0";
+
+    const searchText = [
+      student.full_name,
+      student.student_id,
+      student.class_name
+    ].join(" ").toLowerCase();
+
+    label.dataset.search = searchText;
+
+    const checkbox = document.createElement("input");
+
+    checkbox.type = "checkbox";
+    checkbox.value = student.id;
+    checkbox.className = "material-student-checkbox";
+    checkbox.style.width = "auto";
+    checkbox.style.marginRight = "8px";
+
+    label.appendChild(checkbox);
+
+    label.appendChild(
+      document.createTextNode(
+        `${student.full_name} | ${student.student_id} | ${student.class_name}`
+      )
+    );
+
+    container.appendChild(label);
+  });
+}
+
+function filterMaterialStudents() {
+  const search = document
+    .getElementById("materialStudentSearch")
+    .value.toLowerCase()
+    .trim();
+
+  const labels = document.querySelectorAll(
+    "#materialStudentList label"
+  );
+
+  labels.forEach(label => {
+    label.style.display = label.dataset.search.includes(search)
+      ? "block"
+      : "none";
+  });
+}
+
 
 function loadMaterialClasses() {
   const container = document.getElementById("materialClassList");
