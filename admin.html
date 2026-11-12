@@ -182,10 +182,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
   ></textarea>
 
   <label>Who should receive this material?</label>
-  <select id="materialAudience" onchange="toggleMaterialClasses()">
-    <option value="all">All Students</option>
-    <option value="classes">Selected Classes</option>
-  </select>
+  <select id="materialAudience" onchange="toggleMaterialRecipients()">
+  <option value="all">All Students</option>
+  <option value="classes">Selected Classes</option>
+  <option value="students">Selected Students</option>
+</select>
 
   <div id="materialClassSection" class="hidden">
     <label>Select Classes</label>
