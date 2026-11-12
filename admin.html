@@ -1318,6 +1318,20 @@ async function uploadLearningMaterial() {
     }
   }
 
+  let selectedStudentIds = [];
+
+  if (audience === "students") {
+    selectedStudentIds = Array.from(
+      document.querySelectorAll(".material-student-checkbox:checked")
+    ).map(box => box.value);
+
+    if (selectedStudentIds.length === 0) {
+      message("Select at least one student.", true);
+      return;
+    }
+  }
+  
+  
   const button = document.querySelector(
     'button[onclick="uploadLearningMaterial()"]'
   );
@@ -1339,6 +1353,7 @@ async function uploadLearningMaterial() {
     formData.append("description", description);
     formData.append("audience", audience);
     formData.append("class_names", JSON.stringify(selectedClasses));
+    formData.append("student_ids", JSON.stringify(selectedStudentIds));
     formData.append("file", file);
 
     const response = await fetch(
@@ -1370,7 +1385,13 @@ async function uploadLearningMaterial() {
       box.checked = false;
     });
 
-    toggleMaterialClasses();
+    document.querySelectorAll(".material-student-checkbox").forEach(box => {
+  box.checked = false;
+});
+
+document.getElementById("materialStudentSearch").value = "";
+
+toggleMaterialRecipients();
 
     await loadLearningMaterials();
 
