@@ -1150,6 +1150,234 @@ supabaseClient.auth.onAuthStateChange((event,session)=>{
   if(event==="SIGNED_OUT") showLogin();
 });
 
+// =====================================
+// LEARNING MATERIALS - ADMIN FUNCTIONS
+// =====================================
+
+function toggleMaterialClasses() {
+  const audience = document.getElementById("materialAudience").value;
+  const section = document.getElementById("materialClassSection");
+
+  section.classList.toggle("hidden", audience !== "classes");
+}
+
+function loadMaterialClasses() {
+  const container = document.getElementById("materialClassList");
+  container.innerHTML = "";
+
+  const classes = [...new Set(
+    students.map(student => student.class_name).filter(Boolean)
+  )].sort();
+
+  if (classes.length === 0) {
+    container.textContent = "No student classes found.";
+    return;
+  }
+
+  classes.forEach(className => {
+    const label = document.createElement("label");
+    label.style.display = "block";
+    label.style.margin = "8px 0";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = className;
+    checkbox.className = "material-class-checkbox";
+    checkbox.style.width = "auto";
+    checkbox.style.marginRight = "8px";
+
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(className));
+    container.appendChild(label);
+  });
+}
+
+async function uploadLearningMaterial() {
+  const title = document.getElementById("materialTitle").value.trim();
+  const description = document.getElementById("materialDescription").value.trim();
+  const audience = document.getElementById("materialAudience").value;
+  const file = document.getElementById("materialFile").files[0];
+
+  if (!title) {
+    message("Enter the PDF title.", true);
+    return;
+  }
+
+  if (!file) {
+    message("Please select a PDF file.", true);
+    return;
+  }
+
+  if (!file.name.toLowerCase().endsWith(".pdf")) {
+    message("Only PDF files are allowed.", true);
+    return;
+  }
+
+  if (file.size === 0 || file.size > 20 * 1024 * 1024) {
+    message("PDF must be smaller than 20 MB.", true);
+    return;
+  }
+
+  let selectedClasses = [];
+
+  if (audience === "classes") {
+    selectedClasses = Array.from(
+      document.querySelectorAll(".material-class-checkbox:checked")
+    ).map(box => box.value);
+
+    if (selectedClasses.length === 0) {
+      message("Select at least one class.", true);
+      return;
+    }
+  }
+
+  const button = document.querySelector(
+    'button[onclick="uploadLearningMaterial()"]'
+  );
+
+  button.disabled = true;
+  button.textContent = "Uploading PDF...";
+
+  try {
+    const token = await getToken();
+
+    if (!token) {
+      throw new Error("Your session has expired. Please log in again.");
+    }
+
+    const formData = new FormData();
+
+    formData.append("action", "upload_material");
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("audience", audience);
+    formData.append("class_names", JSON.stringify(selectedClasses));
+    formData.append("file", file);
+
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/manage-learning-materials`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "apikey": SUPABASE_KEY
+        },
+        body: formData
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "PDF upload failed.");
+    }
+
+    message("PDF uploaded successfully.");
+
+    document.getElementById("materialTitle").value = "";
+    document.getElementById("materialDescription").value = "";
+    document.getElementById("materialFile").value = "";
+    document.getElementById("materialAudience").value = "all";
+
+    document.querySelectorAll(".material-class-checkbox").forEach(box => {
+      box.checked = false;
+    });
+
+    toggleMaterialClasses();
+
+    await loadLearningMaterials();
+
+  } catch (error) {
+    message(error.message, true);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Upload PDF";
+  }
+}
+
+async function loadLearningMaterials() {
+  const container = document.getElementById("learningMaterialsList");
+
+  container.textContent = "Loading learning materials...";
+
+  try {
+    const result = await callFunction(
+      "manage-learning-materials",
+      { action: "admin_list_materials" }
+    );
+
+    container.innerHTML = "";
+
+    if (!result.materials || result.materials.length === 0) {
+      container.textContent = "No PDF materials uploaded yet.";
+      return;
+    }
+
+    result.materials.forEach(material => {
+      const card = document.createElement("div");
+      card.className = "assignment";
+
+      const title = document.createElement("h4");
+      title.textContent = material.title;
+
+      const description = document.createElement("p");
+      description.textContent = material.description || "No description.";
+
+      const audience = document.createElement("p");
+      audience.textContent = material.audience === "all"
+        ? "Available to: All Students"
+        : "Available to: " + material.class_names.join(", ");
+
+      const fileName = document.createElement("p");
+      fileName.textContent = "File: " + material.file_name;
+
+      const link = document.createElement("a");
+      link.className = "open-link";
+      link.href = material.download_url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Open PDF";
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "danger";
+      deleteButton.textContent = "Delete PDF";
+
+      deleteButton.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to delete this PDF?")) return;
+
+        deleteButton.disabled = true;
+
+        try {
+          await callFunction("manage-learning-materials", {
+            action: "delete_material",
+            material_id: material.id
+          });
+
+          message("PDF deleted successfully.");
+          await loadLearningMaterials();
+
+        } catch (error) {
+          message(error.message, true);
+          deleteButton.disabled = false;
+        }
+      });
+
+      card.appendChild(title);
+      card.appendChild(description);
+      card.appendChild(audience);
+      card.appendChild(fileName);
+      card.appendChild(link);
+      card.appendChild(deleteButton);
+
+      container.appendChild(card);
+    });
+
+  } catch (error) {
+    container.textContent = "Could not load materials: " + error.message;
+  }
+}
+  
 checkSession();
 
 // ===============================
