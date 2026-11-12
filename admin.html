@@ -188,10 +188,18 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <option value="students">Selected Students</option>
 </select>
 
-  <div id="materialClassSection" class="hidden">
-    <label>Select Classes</label>
-    <div id="materialClassList"></div>
-  </div>
+<div id="materialStudentSection" class="hidden">
+  <label>Select Students</label>
+
+  <input
+    type="text"
+    id="materialStudentSearch"
+    placeholder="Search by name, admission number or class"
+    oninput="filterMaterialStudents()"
+  >
+
+  <div id="materialStudentList"></div>
+</div>
 
   <label>Select PDF File</label>
   <input
