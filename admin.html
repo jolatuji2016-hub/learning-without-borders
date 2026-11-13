@@ -182,7 +182,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   ></textarea>
 
   <label>Who should receive this material?</label>
-  <select id="materialAudience" onchange="toggleMaterialRecipients()">
+  <select id="materialAudience" onchange="alert('Selected: ' + this.value); toggleMaterialRecipients();">
   <option value="all">All Students</option>
   <option value="classes">Selected Classes</option>
   <option value="students">Selected Students</option>
