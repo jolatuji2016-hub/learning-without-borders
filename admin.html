@@ -1178,6 +1178,11 @@ function toggleMaterialRecipients() {
   classSection.classList.toggle("hidden", audience !== "classes");
   studentSection.classList.toggle("hidden", audience !== "students");
 
+  alert(
+    "Selected: " + audience +
+    "\nStudent section class: " + studentSection.className
+  );
+
   if (audience === "students") {
     loadMaterialStudents();
   }
