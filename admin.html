@@ -154,6 +154,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 <input id="worksheetTopic" placeholder="Topic">
 <textarea id="worksheetInstructions" placeholder="Instructions for students"></textarea>
+  <label>Comprehension Passage (Optional)</label>
+<textarea
+  id="worksheetPassage"
+  placeholder="Paste or type the comprehension passage here. Leave empty if not required."
+  rows="8"
+></textarea>
 <label>Pass mark (%)</label>
 <input id="worksheetPassMark" type="number" min="0" max="100" value="50">
 <button onclick="createWorksheet()">Create Worksheet</button>
