@@ -685,10 +685,11 @@ async function createWorksheet() {
     await callFunction("manage-worksheets",payload);
     message("Worksheet created successfully. It is currently a draft.");
 
-    ["worksheetTitle","worksheetSubject","worksheetClass",
-     "worksheetTopic","worksheetInstructions"]
-      .forEach(id=>document.getElementById(id).value="");
+["worksheetTitle","worksheetSubject","worksheetClass",
+ "worksheetTopic","worksheetInstructions","worksheetPassage"]
+  .forEach(id=>document.getElementById(id).value="");
 
+    
     await loadWorksheets();
   } catch(error) {
     message(error.message,true);
