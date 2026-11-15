@@ -358,6 +358,26 @@ async function startWorksheet() {
 
     const container = document.getElementById("questionsContainer");
     container.innerHTML = "";
+    // DISPLAY OPTIONAL COMPREHENSION PASSAGE
+const passageText = data.worksheet.passage || "";
+
+if (passageText.trim() !== "") {
+  const passageBlock = document.createElement("div");
+  passageBlock.className = "question comprehension-passage";
+
+  const passageHeading = document.createElement("h3");
+  passageHeading.textContent = "Comprehension Passage";
+
+  const passageContent = document.createElement("p");
+  passageContent.textContent = passageText;
+  passageContent.style.whiteSpace = "pre-wrap";
+  passageContent.style.lineHeight = "1.7";
+
+  passageBlock.appendChild(passageHeading);
+  passageBlock.appendChild(passageContent);
+
+  container.appendChild(passageBlock);
+}
 
     currentQuestions.forEach((question, index) => {
       const block = document.createElement("div");
