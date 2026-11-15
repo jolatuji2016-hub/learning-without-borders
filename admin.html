@@ -1162,7 +1162,6 @@ supabaseClient.auth.onAuthStateChange((event,session)=>{
 // LEARNING MATERIALS - ADMIN FUNCTIONS
 // =====================================
 
-
 function toggleMaterialRecipients() {
   const audience = document.getElementById("materialAudience").value;
 
@@ -1181,6 +1180,7 @@ function toggleMaterialRecipients() {
     loadMaterialStudents();
   }
 }
+
 
 function loadMaterialStudents() {
   const container = document.getElementById("materialStudentList");
