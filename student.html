@@ -434,7 +434,7 @@ async function loadLearningMaterials() {
 
       const link = document.createElement("a");
       link.className = "open-link";
-      link.href = item.signed_url;
+      link.href = item.download_url;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       link.textContent = "Open PDF";
