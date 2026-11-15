@@ -373,6 +373,92 @@ async function loadPerformance() {
   }
 }
 
+async function loadLearningMaterials() {
+  const container = document.getElementById("learningMaterials");
+
+  container.innerHTML =
+    '<p class="section-message">Loading your learning materials...</p>';
+
+  try {
+    const { data: sessionData, error: sessionError } =
+      await supabaseClient.auth.getSession();
+
+    if (sessionError || !sessionData.session) {
+      throw new Error("Please log in again to view your materials.");
+    }
+
+    const response = await fetch(
+      SUPABASE_URL + "/functions/v1/manage-learning-materials",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_PUBLISHABLE_KEY,
+          "Authorization": "Bearer " + sessionData.session.access_token
+        },
+        body: JSON.stringify({
+          action: "student_list_materials"
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Could not load learning materials.");
+    }
+
+    container.innerHTML = "";
+
+    const materials = result.materials || [];
+
+    if (materials.length === 0) {
+      container.innerHTML =
+        '<p class="section-message">No learning materials available yet.</p>';
+      return;
+    }
+
+    materials.forEach(function(item) {
+      const card = document.createElement("div");
+      card.className = "assignment";
+
+      const title = document.createElement("h4");
+      title.textContent = item.title;
+
+      const description = document.createElement("p");
+      description.textContent = item.description || "PDF learning material";
+
+      const file = document.createElement("p");
+      file.textContent = item.file_name;
+
+      const link = document.createElement("a");
+      link.className = "open-link";
+      link.href = item.signed_url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Open PDF";
+
+      card.appendChild(title);
+      card.appendChild(description);
+      card.appendChild(file);
+      card.appendChild(link);
+
+      container.appendChild(card);
+    });
+
+  } catch (error) {
+    container.innerHTML = "";
+
+    const message = document.createElement("p");
+    message.className = "section-message";
+    message.textContent =
+      "Could not load learning materials: " + error.message;
+
+    container.appendChild(message);
+  }
+  }
+  
+  
   function displayAssignments(assignments) {
   worksheetList.innerHTML = "";
 
